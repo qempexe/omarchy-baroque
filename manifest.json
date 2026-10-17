@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.qempexe.baroque",
+  "name": "Baroque",
+  "version": "1.0.0",
+  "author": "qempexe",
+  "license": "MIT",
+  "description": "Restyles the stock Omarchy bar without replacing it: 32 ready made looks and 20 places for your own, full width, one pill, islands, tabs or a pill per widget, 32 kinds of ends from slanted and arrows to cartouche, fleur and onion dome, 30 surfaces, 22 kinds of lines and 18 ornaments to combine, from neon and glass to gilded frames, marble and spiderwebs, colors from your theme, palette or window border, shadows, hover and open-panel marks, and rounded screen corners. Every widget keeps working.",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "qml/Service.qml",
+    "barWidget": "qml/BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Baroque",
+    "category": "Appearance",
+    "description": "Shapes, colors and spacing for your bar",
+    "aliases": [
+      "baroque",
+      "bar style",
+      "islands",
+      "pill",
+      "tabs",
+      "shapes"
+    ],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {},
+    "schema": []
+  }
+}
