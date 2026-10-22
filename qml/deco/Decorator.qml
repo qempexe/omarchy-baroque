@@ -152,7 +152,7 @@ Item {
             var s = found.slots[i]
             var g = groups[s.region]
             if (!g || !s.visible) continue
-            var len = deco.vertical ? s.height : s.width
+            var len = lengthOf(s)
             if (len > 0) { g.sum += len; g.n++ }
         }
         var length = deco.content ? (deco.vertical ? deco.content.height : deco.content.width) : 0
@@ -200,15 +200,46 @@ Item {
 
     property string lastKey: ""
 
+    // The system tray keeps room for its drawer even while the drawer is shut: an
+    // empty stretch before the arrow, where the hidden icons slide in on hover.
+    // Nothing is drawn there, so neither is a shape: only what the drawer shows
+    // counts. A tray that grows with its drawer has no such room, and keeps all of it.
+    function trayIn(s) {
+        var w = s ? s.activeItem : null
+        if (!w || w.moduleName !== "omarchy.tray") return null
+        if (typeof w.drawerExtent !== "number" || typeof w.revealExtent !== "number") return null
+        return w
+    }
+    function trayRoom(s) {
+        var w = trayIn(s)
+        if (!w) return 0
+        var kids = w.children || []
+        for (var i = 0; i < kids.length; i++) {
+            var it = kids[i] ? kids[i].item : null
+            if (it && (typeof it.drawerBlockWidth === "number" || typeof it.drawerBlockHeight === "number")) {
+                var block = deco.vertical ? it.drawerBlockHeight : it.drawerBlockWidth
+                return block > 0 ? Math.max(0, w.drawerExtent - w.revealExtent) : 0
+            }
+        }
+        return 0
+    }
+    // how long a slot is along the bar, without the room nothing is drawn in
+    function lengthOf(s) {
+        return Math.max(0, (deco.vertical ? s.height : s.width) - trayRoom(s))
+    }
+
     function measure(found) {
         var slots = []
         for (var i = 0; i < found.slots.length; i++) {
             var s = found.slots[i]
             if (!s.visible || s.width <= 0 || s.height <= 0) continue
+            var len = lengthOf(s)
+            if (len <= 0) continue
             var p = s.mapToItem(deco.content, 0, 0)
+            var lead = (deco.vertical ? s.height : s.width) - len
             slots.push({
-                a: deco.vertical ? p.y : p.x,
-                len: deco.vertical ? s.height : s.width,
+                a: (deco.vertical ? p.y : p.x) + lead,
+                len: len,
                 region: s.region,
                 hovered: s.hovered === true,
                 open: s.panelOpen === true
@@ -268,6 +299,8 @@ Item {
                 s.visibleChanged.connect(deco.poke)
                 if (s.hoveredChanged) s.hoveredChanged.connect(deco.poke)
                 if (s.panelOpenChanged) s.panelOpenChanged.connect(deco.poke)
+                var t = trayIn(s)
+                if (t) t.revealExtentChanged.connect(deco.poke)
                 list.push(s)
             } catch (e) { }
         }
@@ -283,6 +316,8 @@ Item {
                 s.visibleChanged.disconnect(deco.poke)
                 if (s.hoveredChanged) s.hoveredChanged.disconnect(deco.poke)
                 if (s.panelOpenChanged) s.panelOpenChanged.disconnect(deco.poke)
+                var t = trayIn(s)
+                if (t) t.revealExtentChanged.disconnect(deco.poke)
             } catch (e) { }
         }
         deco.watched = []
