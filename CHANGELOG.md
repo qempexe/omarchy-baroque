@@ -4,6 +4,16 @@ All notable changes to Baroque. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.3] - 2026-11-04
+
+### Changed
+
+- The settings header shows the logo, light or dark to suit the panel.
+
+### Fixed
+
+- The About tab sits in the middle of the tab, not at its top.
+
 ## [1.1.2] - 2026-11-04
 
 ### Fixed
