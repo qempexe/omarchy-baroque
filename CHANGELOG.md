@@ -4,6 +4,16 @@ All notable changes to Baroque. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-11-04
+
+### Fixed
+
+- On Omarchy 4.5, a bar with widgets in the center only could still be treated as an
+  older bar, and its full-screen window painted over the desktop. Baroque now finds the
+  bar strip from any widget, and never sizes or colors a bar window that spans the screen:
+  if it can't find the strip there, it leaves the bar as it is and says so in the settings.
+  ([#1](https://github.com/qempexe/omarchy-baroque/issues/1))
+
 ## [1.1.0] - 2026-11-04
 
 ### Added
@@ -51,6 +61,7 @@ All notable changes to Baroque. The format follows
   the button's clicks do.
 - ipc for looks, shapes, places, corners, the frame and status.
 
+[1.1.1]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/qempexe/omarchy-baroque/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/qempexe/omarchy-baroque/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/qempexe/omarchy-baroque/releases/tag/v1.0.0
