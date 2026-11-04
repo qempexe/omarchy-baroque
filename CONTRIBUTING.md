@@ -1,5 +1,7 @@
 # Adding an end, a surface, a line or an ornament
 
+Everyone taking part is expected to follow the [code of conduct](CODE_OF_CONDUCT.md).
+
 Every kind of end, surface, line and ornament is one entry in a list, in its own
 file:
 
@@ -50,8 +52,9 @@ where they are.
   over every pixel; a few hundred path calls is fine.
 - No randomness: use `g.seed` and `g.hash(n)` so the same bar looks the same
   every time it is drawn.
-- JavaScript here is plain ES5 (`var`, `function`), no `String()`, `Number()`,
-  or `Object.` calls.
+- JavaScript here is modern (`const`, `let`, arrow functions). Names other files
+  read stay top-level `var` or `function`, which is how a `.pragma library` file
+  shares them. No `String()`, `Number()`, or `Object.` calls.
 
 ## What you are given: `g`
 
@@ -112,12 +115,12 @@ In `Surfaces.js`. All hooks are optional; an entry with none is a plain fill.
 { key: "linen", label: "Linen", about: "Linen has a fine weave.",
   // details clipped to the shape, drawn after the fill
   inside: function (g) {
-      var ctx = g.ctx;
+      const ctx = g.ctx;
       ctx.strokeStyle = "rgba(255,255,255,0.06)";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      for (var x = g.x0; x < g.x1; x += 3) { ctx.moveTo(x, g.y0); ctx.lineTo(x, g.y1); }
-      for (var y = g.y0; y < g.y1; y += 3) { ctx.moveTo(g.x0, y); ctx.lineTo(g.x1, y); }
+      for (let x = g.x0; x < g.x1; x += 3) { ctx.moveTo(x, g.y0); ctx.lineTo(x, g.y1); }
+      for (let y = g.y0; y < g.y1; y += 3) { ctx.moveTo(g.x0, y); ctx.lineTo(g.x1, y); }
       ctx.stroke();
   } },
 ```
@@ -153,11 +156,11 @@ In `Lines.js`. One hook, `draw(g)`, run after the surface.
 { key: "dashes", label: "Dashes", about: "Dashes run along the long sides.",
   draw: function (g) {
       if (g.lw <= 0) return;
-      var ctx = g.ctx;
+      const ctx = g.ctx;
       ctx.strokeStyle = g.lineStyle;
       ctx.lineWidth = g.lwN;
       ctx.beginPath();
-      for (var x = g.side0; x + 6 <= g.side1; x += 10) {
+      for (let x = g.side0; x + 6 <= g.side1; x += 10) {
           ctx.moveTo(x, g.y0 + g.lwN / 2); ctx.lineTo(x + 6, g.y0 + g.lwN / 2);
           ctx.moveTo(x, g.y1 - g.lwN / 2); ctx.lineTo(x + 6, g.y1 - g.lwN / 2);
       }
@@ -184,7 +187,7 @@ In `Ornaments.js`. One hook, `draw(g)`, run last, on top of everything.
 ```js
 { key: "dots", label: "Dots", about: "Dots sit at both ends.",
   draw: function (g) {
-      var ctx = g.ctx, d = Math.max(1.5, g.mw), cy = (g.y0 + g.y1) / 2;
+      const ctx = g.ctx, d = Math.max(1.5, g.mw), cy = (g.y0 + g.y1) / 2;
       ctx.fillStyle = g.markStyle || g.tone;
       ctx.beginPath();
       ctx.arc(g.x0 + g.T * 0.5, cy, d, 0, Math.PI * 2);
@@ -208,7 +211,7 @@ First the outline, in `forms`:
 ```js
 // a step in the middle
 step: function (T, L, rt, rb) {
-    var s = sizes(T, L).s;
+    const s = sizes(T, L).s;
     return { pts: [[s, T], [s, T * 0.65], [0, T * 0.65], [0, T * 0.35], [s, T * 0.35], [s, 0]],
              links: [null, null, null, null, null] };
 },
