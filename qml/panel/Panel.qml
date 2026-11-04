@@ -1,7 +1,9 @@
 import QtQuick
 import "../js/Util.js" as Util
 import "../js/Schema.js" as Schema
+import "../js/Shapes.js" as Shapes
 import Quickshell
+import qs.Commons
 
 // docked panel, hangs off the bar button.
 // BarWidget only uses: opened, open(), close(), closeForPopoutSwitch()
@@ -125,9 +127,30 @@ Item {
         var ww = (win && win.width > 0) ? win.width : 0
         var wh = (win && win.height > 0) ? win.height : 0
         var small = root.vertical ? (ww > 0 && ww < sw * 0.5) : (wh > 0 && wh < sh * 0.5)
-        root.useRect = !!qsWin && small
+        // Omarchy 4.5 and later: the bar window spans its screen and the bar is a strip at its
+        // edge, so the panel hangs off the outer edge of Baroque's shapes instead
+        var spans = !!qsWin && !small && (root.vertical ? ww >= sw * 0.5 : wh >= sh * 0.5)
+        root.useRect = !!qsWin && (small || spans)
         root.anchorWin = qsWin
-        if (root.useRect) {
+        if (spans) {
+            var cfg = root.svc ? root.svc.cfg : null
+            var bs = root.bar && typeof root.bar.barSize === "number" && root.bar.barSize > 0 ? root.bar.barSize
+                   : (root.vertical ? Style.bar.sizeVertical : Style.bar.sizeHorizontal)
+            var t = cfg && cfg.enabled === true ? Shapes.thicknessFor(bs, cfg) : bs
+            if (root.vertical) {
+                root.rectW = 1
+                root.rectH = Math.max(1, item.height)
+                root.rectY = pos.y
+                root.rectX = side === "left" ? Math.max(0, t - 1) : Math.max(0, ww - t)
+            } else {
+                root.rectW = Math.max(1, item.width)
+                root.rectH = 1
+                root.rectX = pos.x
+                root.rectY = side === "top" ? Math.max(0, t - 1) : Math.max(0, wh - t)
+            }
+            root.extra = 0
+            wh = t; ww = t
+        } else if (root.useRect) {
             if (root.vertical) {
                 root.rectW = 1
                 root.rectH = Math.max(1, item.height)
