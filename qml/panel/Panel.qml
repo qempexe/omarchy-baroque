@@ -136,7 +136,7 @@ Item {
             var cfg = root.svc ? root.svc.cfg : null
             var bs = root.bar && typeof root.bar.barSize === "number" && root.bar.barSize > 0 ? root.bar.barSize
                    : (root.vertical ? Style.bar.sizeVertical : Style.bar.sizeHorizontal)
-            var t = cfg && cfg.enabled === true ? Shapes.thicknessFor(bs, cfg) : bs
+            var t = cfg && cfg.enabled === true ? Shapes.thicknessFor(bs, cfg) + Shapes.floatGapFor(cfg) : bs
             if (root.vertical) {
                 root.rectW = 1
                 root.rectH = Math.max(1, item.height)

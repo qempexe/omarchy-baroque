@@ -107,10 +107,14 @@ function fitSpacing(want, length, margin, groups, reach, minGap) {
     return Math.max(0, Math.min(want, best));
 }
 
+// how far the whole bar floats off the screen edge
+function floatGapFor(cfg) { return cfg ? clamp(cfg.floatGap, 0, 40) : 0; }
+
 function sectionMargin(cfg, normal, barSize) {
     if (!cfg) return normal;
-    // full width: the stock spacing unless you changed "Room at the ends"
-    if (cfg.shape === "full") return cfg.fullInset === 8 || typeof cfg.fullInset !== "number" ? normal : clamp(cfg.fullInset, 0, 200);
+    // full width: the stock spacing unless you changed "Room at the ends", and a floating
+    // full-width bar keeps as far from the screen's ends as from its edge
+    if (cfg.shape === "full") return floatGapFor(cfg) + (cfg.fullInset === 8 || typeof cfg.fullInset !== "number" ? normal : clamp(cfg.fullInset, 0, 200));
     var side = clamp(cfg.sideGap, 0, 200);
     // widget pills reach past their first and last widget
     if (cfg.shape === "widgets") return side + pillRoom(cfg, barSize > 0 ? barSize : 26) + 2;
@@ -220,7 +224,10 @@ function layout(view, slotsIn, cfg) {
     var reg = regions(slots);
 
     if (cfg.shape === "full") {
-        result.shapes.push({ a: 0, len: view.length, c: 0, w: view.thickness, r: 0, role: "base",
+        // floating off the edge, it keeps the same distance from the ends, with round corners
+        var fg = Math.min(floatGapFor(cfg), view.length / 4);
+        result.shapes.push({ a: fg, len: view.length - 2 * fg, c: 0, w: view.thickness,
+                             r: fg > 0 ? Math.min(clamp(cfg.radius, 0, 40), view.thickness / 2) : 0, role: "base",
                              region: "all", index: count++, attached: false });
     } else if (cfg.shape === "pill") {
         if (cfg.pillFit && slots.length > 0)

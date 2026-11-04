@@ -101,6 +101,8 @@ var groups = [
 
       { key: "edgeGap", section: "Spacing", label: "Distance from the edge", kind: "int", fallback: 6, min: 0, max: 24, step: 1,
         hint: "Room between the screen edge and the shapes, in pixels. The bar grows by twice this.", when: floating },
+      { key: "floatGap", section: "Spacing", label: "Float off the edge", kind: "int", fallback: 0, min: 0, max: 40, step: 1,
+        hint: "A gap between the screen edge and the whole bar, so it floats. Windows keep clear of it too. With Full width the bar also stays this far from the screen's ends, with rounded corners." },
       { key: "sideGap", section: "Spacing", label: "Distance from the sides", kind: "int", fallback: 10, min: 0, max: 80, step: 2,
         hint: "How far the shapes stay from the two ends of the bar.", when: floating },
       { key: "padding", section: "Spacing", label: "Room around the widgets", kind: "int", fallback: 6, min: 0, max: 24, step: 1,

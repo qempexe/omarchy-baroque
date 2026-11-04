@@ -67,8 +67,8 @@ Item {
         return vertical ? Style.bar.sizeVertical : Style.bar.sizeHorizontal
     }
     readonly property bool edgeAtStart: position === "top" || position === "left"
-    // room between the screen edge and the whole bar
-    readonly property real floatGap: 0
+    // the gap between the screen edge and the whole bar ("Float off the edge")
+    readonly property real floatGap: (!cfg || barHidden) ? 0 : Shapes.floatGapFor(cfg)
     property var host: null             // older bars: the item that holds the widget groups
     readonly property real normalMargin: Style.space(8)
 
