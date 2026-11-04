@@ -92,14 +92,26 @@ Item {
         return it && typeof it.moduleName === "string" && typeof it.region === "string" && ("activeItem" in it)
     }
     // the left / right groups: loaders that carry a region and a list of entries
+    // older bars list their widgets in a loader with `entries`, Omarchy 4.5 in a grid with `keys`
+    function hasWidgets(it) { return ("entries" in it) || (("keys" in it) && ("listRows" in it)) }
     function isSection(it) {
-        return it && typeof it.region === "string" && ("entries" in it) && !isSlot(it)
+        return it && typeof it.region === "string" && hasWidgets(it) && !isSlot(it)
             && (it.region === "left" || it.region === "right")
     }
 
     // any list of widgets, the center one too
     function isList(it) {
-        return it && typeof it.region === "string" && ("entries" in it) && !isSlot(it)
+        return it && typeof it.region === "string" && hasWidgets(it) && !isSlot(it)
+    }
+    // what a list lays its widgets out with: a loader's row or column, or the grid itself
+    function rowOf(list) { return list ? (list.item !== undefined ? list.item : list) : null }
+    function setRowSpacing(row, v) {
+        if (!row) return
+        if (typeof row.spacing === "number") setIfDifferent(row, "spacing", v)
+        else if (typeof row.columnSpacing === "number") {
+            setIfDifferent(row, "columnSpacing", deco.vertical ? 0 : v)
+            setIfDifferent(row, "rowSpacing", deco.vertical ? v : 0)
+        }
     }
 
     // older bars: the item right under the window's root that holds the widget groups
@@ -116,20 +128,52 @@ Item {
 
     // Omarchy 4.5 and later: the item between the window's root and the widgets that is a
     // thin strip along the window's edge, the window being as big as the screen
+    // The strip is the outermost item, on the way up from this button (always on the bar) or
+    // from a widget, that is still as thin as a bar: its parent is the screen-sized window.
+    function acrossOf(it) { return it ? (deco.vertical ? it.width : it.height) : 0 }
+    function stripFrom(start) {
+        let it = start, last = null, guard = 0
+        while (it && guard++ < 40) {
+            if (it === deco.content || acrossOf(it) > 200) break
+            if (acrossOf(it) > 0) last = it
+            it = it.parent
+        }
+        return last
+    }
     function findStrip(found) {
-        // from any widget: a bar may have widgets in the center only
-        const start = found.sections[0] || found.lists[0] || found.slots[0]
-        if (!deco.content || !start) return null
-        let it = start, cand = null, guard = 0
-        while (it && it.parent && it.parent !== deco.content && guard++ < 20) it = it.parent
-        if (!it || it.parent !== deco.content) return null
-        cand = it
-        const along = deco.content.width > deco.content.height
-        const thin = Math.min(cand.width, cand.height)
-        const whole = Math.min(deco.content.width, deco.content.height)
-        // a bar strip is far thinner than its window; on older bars the two are the same
-        if (thin <= 0 || thin > whole * 0.5 || whole - thin < 8) return null
-        return cand
+        if (!deco.content || !spansScreen()) return null
+        const starts = [deco.anchorItem, found.slots[0], found.sections[0], found.lists[0]]
+        for (let i = 0; i < starts.length; i++) {
+            const st = starts[i] ? stripFrom(starts[i]) : null
+            // a strip runs the whole length of its window
+            const len = deco.vertical ? st && st.height : st && st.width
+            const full = deco.vertical ? deco.content.height : deco.content.width
+            if (st && st !== deco.anchorItem && len >= full * 0.9) return st
+        }
+        return null
+    }
+    // what the bar looks like, for the log, when it can't be read
+    function describe(found) {
+        const out = []
+        function walk(it, depth) {
+            if (!it || depth > 4 || out.length > 40) return
+            const name = String(it).replace(/\(0x[0-9a-f]+\)/, "")
+            const extra = (typeof it.region === "string" ? " region=" + it.region : "")
+                + (typeof it.moduleName === "string" ? " module=" + it.moduleName : "")
+                + ("entries" in it ? " entries" : "") + ("keys" in it ? " keys" : "")
+            out.push("  ".repeat(depth) + name + " " + Math.round(it.width) + "x" + Math.round(it.height) + extra)
+            const kids = it.children || []
+            for (let i = 0; i < kids.length; i++) walk(kids[i], depth + 1)
+        }
+        walk(deco.content, 0)
+        return "slots " + found.slots.length + ", sections " + found.sections.length + ", lists " + found.lists.length
+            + ", window " + (deco.win ? Math.round(deco.win.width) + "x" + Math.round(deco.win.height) : "?") + "\n" + out.join("\n")
+    }
+    property bool described: false
+    function reportLost(found) {
+        if (deco.described) return
+        deco.described = true
+        console.warn("Baroque: can't read this bar's layout, so it is left as it is. Please send this to the issue tracker:\n" + describe(found))
     }
     // a bar window far thicker than any bar: the whole screen, as from Omarchy 4.5. Without
     // its strip found, Baroque must not size or color such a window, or it covers the desktop
@@ -238,8 +282,7 @@ Item {
             setIfDifferent(s.anchors, side, m)
         }
         for (let j = 0; j < found.lists.length; j++) {
-            const row = found.lists[j].item
-            if (row && typeof row.spacing === "number") setIfDifferent(row, "spacing", spacing)
+            setRowSpacing(rowOf(found.lists[j]), spacing)
         }
         deco.applied = true
     }
@@ -287,8 +330,7 @@ Item {
         const found = collect()
         if (deco.strip) {
             for (let n = 0; n < found.lists.length; n++) {
-                const r2 = found.lists[n].item
-                if (r2 && typeof r2.spacing === "number") setIfDifferent(r2, "spacing", 0)
+                setRowSpacing(rowOf(found.lists[n]), 0)
             }
             giveBackStrip()
             for (let m2 = 0; m2 < found.sections.length; m2++) {
@@ -298,8 +340,7 @@ Item {
         }
         // the stock bar lays its widgets out with no spacing
         for (let k = 0; k < found.lists.length; k++) {
-            const row = found.lists[k].item
-            if (row && typeof row.spacing === "number") setIfDifferent(row, "spacing", 0)
+            setRowSpacing(rowOf(found.lists[k]), 0)
         }
         if (deco.host) {
             try { deco.host.anchors.topMargin = 0; deco.host.anchors.bottomMargin = 0; deco.host.anchors.leftMargin = 0; deco.host.anchors.rightMargin = 0 } catch (e5) { }
@@ -464,9 +505,9 @@ Item {
         const found = cached()
         if (!deco.strip && found.slots.length > 0) deco.strip = findStrip(found)
         // a full-screen bar window whose strip can't be found: leave it alone
-        if (!deco.strip && spansScreen()) { deco.cache = null; restore(); setState("lost"); return }
+        if (!deco.strip && spansScreen()) { reportLost(found); deco.cache = null; restore(); setState("lost"); return }
         // nothing that looks like the stock bar: leave it alone
-        if (found.slots.length === 0) { deco.cache = null; restore(); setState("lost"); return }
+        if (found.slots.length === 0) { reportLost(found); deco.cache = null; restore(); setState("lost"); return }
 
         applyWindow(found)
         if (!deco.drawing) deco.drawing = layerComponent.createObject(deco.content, { z: -1000 })
