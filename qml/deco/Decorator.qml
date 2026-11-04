@@ -17,6 +17,12 @@ import "../js/parts/Lines.js" as Lines
 //   - a layer with the shapes is put under the widgets, and follows them as they change.
 // Every one of these is undone when Baroque is switched off or taken off the bar.
 // If the bar isn't built the way Baroque expects, it touches nothing and reports "lost".
+//
+// From Omarchy 4.5 the bar window spans its whole screen and the bar is a strip along one
+// edge of it, with its own background and a reserved zone of the strip's thickness. There
+// the window is left as it is: the strip's background is hidden, the shapes are drawn along
+// the same edge in the window's clear rest, the strip moves to the middle of them, and the
+// reserved zone grows to what the shapes need.
 Item {
     id: deco
 
@@ -34,6 +40,8 @@ Item {
     property var win: null              // the shell's window object
     property var content: null          // its root item, where the widgets live
     property var drawing: null          // our shapes layer, inside `content`
+    property var strip: null            // Omarchy 4.5 and later: the bar strip inside the window
+    property var stripBg: null          // and its background
     property bool applied: false        // window color / size / margins are ours right now
     property string attachState: ""     // "ok" | "lost"
     property bool barHidden: false
@@ -54,10 +62,14 @@ Item {
         } catch (e) { return vertical ? "left" : "top" }
     }
     readonly property int barSize: {
+        if (strip) return Math.round(vertical ? strip.width : strip.height)
         if (bar && typeof bar.barSize === "number" && bar.barSize > 0) return bar.barSize
         return vertical ? Style.bar.sizeVertical : Style.bar.sizeHorizontal
     }
     readonly property bool edgeAtStart: position === "top" || position === "left"
+    // room between the screen edge and the whole bar
+    readonly property real floatGap: 0
+    property var host: null             // older bars: the item that holds the widget groups
     readonly property real normalMargin: Style.space(8)
 
     function findWindow() {
@@ -90,6 +102,50 @@ Item {
         return it && typeof it.region === "string" && ("entries" in it) && !isSlot(it)
     }
 
+    // older bars: the item right under the window's root that holds the widget groups
+    function findHost(found) {
+        if (!deco.content || found.sections.length === 0) return null
+        var it = found.sections[0], guard = 0
+        while (it && it.parent && it.parent !== deco.content && guard++ < 20) it = it.parent
+        return it && it.parent === deco.content && it.anchors ? it : null
+    }
+    function edgeMarginName() {
+        return deco.position === "bottom" ? "bottomMargin" : deco.position === "left" ? "leftMargin"
+             : deco.position === "right" ? "rightMargin" : "topMargin"
+    }
+
+    // Omarchy 4.5 and later: the item between the window's root and the widgets that is a
+    // thin strip along the window's edge, the window being as big as the screen
+    function findStrip(found) {
+        if (!deco.content || found.sections.length === 0) return null
+        var it = found.sections[0], cand = null, guard = 0
+        while (it && it.parent && it.parent !== deco.content && guard++ < 20) it = it.parent
+        if (!it || it.parent !== deco.content) return null
+        cand = it
+        var along = deco.content.width > deco.content.height
+        var thin = Math.min(cand.width, cand.height)
+        var whole = Math.min(deco.content.width, deco.content.height)
+        // a bar strip is far thinner than its window; on older bars the two are the same
+        if (thin <= 0 || thin > whole * 0.5 || whole - thin < 8) return null
+        return cand
+    }
+    function findStripBg(st) {
+        var kids = st ? st.children : []
+        for (var i = 0; i < kids.length; i++) {
+            var k = kids[i]
+            if (k && k !== deco.drawing && typeof k.color !== "undefined" && k.width >= st.width - 1 && k.height >= st.height - 1
+                    && typeof k.radius === "number") return k
+        }
+        return null
+    }
+
+    // where the shapes go: the whole window on older bars; from 4.5, a band along the bar's
+    // edge, as thick as the shapes need
+    property real bandX: 0
+    property real bandY: 0
+    property real bandW: 0
+    property real bandH: 0
+
     // walks the window's items once, collecting slots, the two end sections and
     // every list of widgets
     function collect() {
@@ -119,14 +175,45 @@ Item {
         try { if (obj[key] !== value) obj[key] = value } catch (e) { }
     }
 
+    function applyStrip(found, thick) {
+        var st = deco.strip, c = deco.content
+        if (!deco.stripBg) deco.stripBg = findStripBg(st)
+        if (deco.stripBg) setIfDifferent(deco.stripBg, "visible", false)
+        var t = deco.barSize, g = deco.floatGap, inner = thick - g
+        // the strip sits in the middle of the shapes, so the widgets stay centred in them
+        var off = deco.barHidden ? 0 : g + Math.max(0, Math.round((inner - t) / 2))
+        if (deco.vertical) {
+            setIfDifferent(st, "x", deco.position === "right" ? c.width - t - off : off)
+            deco.bandX = deco.position === "right" ? c.width - thick : g
+            deco.bandY = 0; deco.bandW = inner; deco.bandH = c.height
+        } else {
+            setIfDifferent(st, "y", deco.position === "bottom" ? c.height - t - off : off)
+            deco.bandY = deco.position === "bottom" ? c.height - thick : g
+            deco.bandX = 0; deco.bandW = c.width; deco.bandH = inner
+        }
+        // the windows keep clear of the shapes, not only of the strip
+        if (!deco.barHidden) setIfDifferent(deco.win, "exclusiveZone", thick)
+    }
+
     function applyWindow(found) {
         var w = deco.win
         // a hidden bar parks itself one bar size past the edge: keep the window
         // that size then, so no strip of it is left on screen
-        var thick = deco.barHidden ? deco.barSize : Shapes.thicknessFor(deco.barSize, deco.cfg)
-        try { if (w.color.a !== 0) w.color = "transparent" } catch (e) { }
-        if (deco.vertical) setIfDifferent(w, "implicitWidth", thick)
-        else setIfDifferent(w, "implicitHeight", thick)
+        var thick = deco.barHidden ? deco.barSize : Shapes.thicknessFor(deco.barSize, deco.cfg) + deco.floatGap
+        if (deco.strip) applyStrip(found, thick)
+        else {
+            try { if (w.color.a !== 0) w.color = "transparent" } catch (e) { }
+            if (deco.vertical) setIfDifferent(w, "implicitWidth", thick)
+            else setIfDifferent(w, "implicitHeight", thick)
+            // the widget row moves off the screen edge by the gap, and the shapes with it
+            if (!deco.host) deco.host = findHost(found)
+            if (deco.host) setIfDifferent(deco.host.anchors, edgeMarginName(), deco.floatGap)
+            var c = deco.content, g = deco.floatGap
+            deco.bandX = deco.position === "left" ? g : 0
+            deco.bandY = deco.position === "top" ? g : 0
+            deco.bandW = c.width - (deco.vertical ? g : 0)
+            deco.bandH = c.height - (deco.vertical ? 0 : g)
+        }
 
         var m = Shapes.sectionMargin(deco.cfg, deco.normalMargin, deco.barSize)
         // widget pills: room between the widgets for each pill's sides and the gap
@@ -160,6 +247,21 @@ Item {
                                  Math.max(8, deco.cfg.pillGap + 6))
     }
 
+    // 4.5 and later: the strip goes back to its edge and its background comes back, both
+    // following the strip again, and the reserved zone follows the strip's thickness
+    function giveBackStrip() {
+        var st = deco.strip, bg = deco.stripBg, w = deco.win
+        var pos = deco.position, vert = deco.vertical
+        if (bg) setIfDifferent(bg, "visible", true)
+        if (st) {
+            try {
+                if (vert) st.x = Qt.binding(function() { return pos === "right" && st.parent ? st.parent.width - st.width : 0 })
+                else st.y = Qt.binding(function() { return pos === "bottom" && st.parent ? st.parent.height - st.height : 0 })
+            } catch (e) { }
+            try { if (w) w.exclusiveZone = Qt.binding(function() { return vert ? st.width : st.height }) } catch (e2) { }
+        }
+    }
+
     // puts back what the stock bar had: bindings to the same values it uses.
     // the bindings are made by the service, which outlives this widget. If the
     // service is already gone (the plugin is being removed), plain values go back
@@ -171,10 +273,25 @@ Item {
         deco.applied = false
         var clear = deco.bar && deco.bar.transparent === true
         var found = collect()
+        if (deco.strip) {
+            for (var n = 0; n < found.lists.length; n++) {
+                var r2 = found.lists[n].item
+                if (r2 && typeof r2.spacing === "number") setIfDifferent(r2, "spacing", 0)
+            }
+            giveBackStrip()
+            for (var m2 = 0; m2 < found.sections.length; m2++) {
+                if (deco.svc && typeof deco.svc.giveBackMargins === "function") deco.svc.giveBackMargins(found.sections[m2].anchors)
+            }
+            return
+        }
         // the stock bar lays its widgets out with no spacing
         for (var k = 0; k < found.lists.length; k++) {
             var row = found.lists[k].item
             if (row && typeof row.spacing === "number") setIfDifferent(row, "spacing", 0)
+        }
+        if (deco.host) {
+            try { deco.host.anchors.topMargin = 0; deco.host.anchors.bottomMargin = 0; deco.host.anchors.leftMargin = 0; deco.host.anchors.rightMargin = 0 } catch (e5) { }
+            deco.host = null
         }
         if (deco.svc && typeof deco.svc.giveBackWindow === "function") {
             if (deco.win) deco.svc.giveBackWindow(deco.win, clear)
@@ -332,6 +449,7 @@ Item {
         }
         if (!deco.content && !findWindow()) { setState("lost"); return }
         var found = cached()
+        if (!deco.strip && found.slots.length > 0) deco.strip = findStrip(found)
         // nothing that looks like the stock bar: leave it alone
         if (found.slots.length === 0) { deco.cache = null; restore(); setState("lost"); return }
 
@@ -341,7 +459,7 @@ Item {
 
         var view = {
             length: deco.vertical ? deco.content.height : deco.content.width,
-            thickness: deco.vertical ? deco.content.width : deco.content.height,
+            thickness: deco.vertical ? deco.bandW : deco.bandH,
             barSize: deco.barSize,
             edgeAtStart: deco.edgeAtStart
         }
@@ -614,7 +732,10 @@ Item {
 
         Item {
             id: layerRoot
-            anchors.fill: parent
+            x: deco.bandX
+            y: deco.bandY
+            width: deco.bandW
+            height: deco.bandH
             visible: deco.wanted && !deco.barHidden
             // fades while the bar isn't in use, if you asked for that. The mouse anywhere
             // over the bar counts, not only over a widget
