@@ -22,16 +22,16 @@ var swatches = [
 
 var floating = [{ key: "shape", is: ["pill", "islands", "widgets"] }];
 var LOOK_SLOTS = 20;
-function emptyLooks() { var out = []; for (var i = 0; i < LOOK_SLOTS; i++) out.push(null); return out; }
+function emptyLooks() { const out = []; for (let i = 0; i < LOOK_SLOTS; i++) out.push(null); return out; }
 
 // ---------- the parts catalogs (parts/*.js) as settings ----------
 
-function keysOf(mod) { var out = []; for (var i = 0; i < mod.list.length; i++) out.push(mod.list[i].key); return out; }
-function labelsOf(mod) { var out = {}; for (var i = 0; i < mod.list.length; i++) out[mod.list[i].key] = mod.list[i].label; return out; }
+function keysOf(mod) { const out = []; for (let i = 0; i < mod.list.length; i++) out.push(mod.list[i].key); return out; }
+function labelsOf(mod) { const out = {}; for (let i = 0; i < mod.list.length; i++) out[mod.list[i].key] = mod.list[i].label; return out; }
 // the keys whose entry has `flag` set to `value`
 function keysWith(mod, flag, value) {
-    var out = [];
-    for (var i = 0; i < mod.list.length; i++) if (mod.list[i][flag] === value) out.push(mod.list[i].key);
+    const out = [];
+    for (let i = 0; i < mod.list.length; i++) if (mod.list[i][flag] === value) out.push(mod.list[i].key);
     return out;
 }
 // "A, B and C"
@@ -39,14 +39,14 @@ function names(labels) {
     if (labels.length < 2) return labels.join("");
     return labels.slice(0, -1).join(", ") + " and " + labels[labels.length - 1];
 }
-function labelsFor(mod, keys) { var out = []; for (var i = 0; i < keys.length; i++) out.push(mod.byKey[keys[i]].label); return out; }
+function labelsFor(mod, keys) { const out = []; for (let i = 0; i < keys.length; i++) out.push(mod.byKey[keys[i]].label); return out; }
 // the hint above a row of tiles: a short intro; the picked tile's own sentence is
 // added by the row itself (see aboutsOf)
 function hintOf(intro, mod) { return intro; }
 // each entry's own sentence, by key
 function aboutsOf(mod) {
-    var out = {};
-    for (var i = 0; i < mod.list.length; i++) if (mod.list[i].about) out[mod.list[i].key] = mod.list[i].about;
+    const out = {};
+    for (let i = 0; i < mod.list.length; i++) if (mod.list[i].about) out[mod.list[i].key] = mod.list[i].about;
     return out;
 }
 var pointingEnds = keysWith(Ends, "pointing", true);
@@ -438,7 +438,7 @@ var presets = [
 ];
 
 function presetFor(key) {
-    for (var i = 0; i < presets.length; i++) if (presets[i].key === key) return presets[i];
+    for (let i = 0; i < presets.length; i++) if (presets[i].key === key) return presets[i];
     return null;
 }
 
@@ -450,15 +450,15 @@ var colorKeys = {};
 var defaults = {};
 var itemByKey = {};
 
-for (var g = 0; g < groups.length; g++) {
-    var items = groups[g].items;
-    for (var i = 0; i < items.length; i++) {
-        var item = items[i];
+for (let g = 0; g < groups.length; g++) {
+    const items = groups[g].items;
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
         itemByKey[item.key] = item;
         if (item.kind === "presets") continue;          // buttons, nothing saved
         if (item.kind === "palette") {
-            for (var t = 0; t < item.targets.length; t++) {
-                var colorKey = item.targets[t].key;
+            for (let t = 0; t < item.targets.length; t++) {
+                const colorKey = item.targets[t].key;
                 defaults[colorKey] = item.fallback[colorKey];
                 colorKeys[colorKey] = item.fallback[colorKey];
             }
@@ -472,24 +472,24 @@ for (var g = 0; g < groups.length; g++) {
 // settings, not on/off and not the saved looks themselves
 var lookKeys = [];
 var lookGroups = ["Shape", "Surface", "Lines", "Ornaments", "Colors", "Widgets", "Motion", "Screen"];
-for (var lg = 0; lg < groups.length; lg++) {
+for (let lg = 0; lg < groups.length; lg++) {
     if (lookGroups.indexOf(groups[lg].title) === -1) continue;
-    var its = groups[lg].items;
-    for (var li = 0; li < its.length; li++) {
+    const its = groups[lg].items;
+    for (let li = 0; li < its.length; li++) {
         if (its[li].kind === "palette") {
-            for (var lt = 0; lt < its[li].targets.length; lt++) lookKeys.push(its[li].targets[lt].key);
+            for (let lt = 0; lt < its[li].targets.length; lt++) lookKeys.push(its[li].targets[lt].key);
         } else lookKeys.push(its[li].key);
     }
 }
 
-for (var h = 0; h < hiddenItems.length; h++) {
+for (let h = 0; h < hiddenItems.length; h++) {
     itemByKey[hiddenItems[h].key] = hiddenItems[h];
     defaults[hiddenItems[h].key] = hiddenItems[h].fallback;
 }
 
 // every key settings.json can hold (the palette row counts as its three colors)
 var settingKeys = [];
-for (var name in defaults) settingKeys.push(name);
+for (const name in defaults) settingKeys.push(name);
 
 function isSetting(key) {
     return settingKeys.indexOf(key) !== -1;
@@ -498,7 +498,7 @@ function isSetting(key) {
 // the setting for a key, or null. Only real settings count:
 // itemByKey["constructor"] is a function, not one of our items
 function itemFor(key) {
-    var item = itemByKey[key];
+    const item = itemByKey[key];
     if (item && typeof item === "object" && item.key === key) return item;
     return null;
 }
@@ -523,7 +523,7 @@ function clean(key, value) {
         if (validHex(value)) return value.toLowerCase();
         return colorKeys[key];
     }
-    var item = itemFor(key);
+    const item = itemFor(key);
     if (item === null) return undefined;
     if (value === null || value === undefined) return item.fallback;
 
@@ -533,7 +533,7 @@ function clean(key, value) {
     }
 
     if (item.kind === "int") {
-        var n = parseNum(value);
+        let n = parseNum(value);
         if (!isFinite(n)) return item.fallback;
         n = Math.round(n);
         if (n < item.min) return item.min;
@@ -552,7 +552,7 @@ function clean(key, value) {
 
     // text: no control characters and no < >, so it always shows as plain text,
     // and not longer than allowed
-    var text = Util.toText(value).replace(/[\u0000-\u001f\u007f<>]/g, "");
+    let text = Util.toText(value).replace(/[\u0000-\u001f\u007f<>]/g, "");
     if (item.maxLength) text = text.slice(0, item.maxLength);
     return text;
 }
@@ -572,22 +572,22 @@ function migrate(obj) {
     if (!obj || typeof obj !== "object" || Array.isArray(obj)) return obj;
     // Scroll ends were round ends with the Scrolls ornament's curls: they are that now
     if (obj.ends === "scroll") {
-        var sc = {};
-        for (var sk in obj) if (sk !== "__proto__") sc[sk] = obj[sk];
+        const sc = {};
+        for (const sk in obj) if (sk !== "__proto__") sc[sk] = obj[sk];
         sc.ends = "capsule";
         if (sc.ornaments === undefined || sc.ornaments === "none") sc.ornaments = "scrolls";
         obj = sc;
     }
-    var old = typeof obj.surface === "string" && oldSurfaces.hasOwnProperty(obj.surface) ? oldSurfaces[obj.surface] : null;
-    var needsLines = obj.lines === undefined && (obj.surface !== undefined || obj.border !== undefined || obj.borderStyle !== undefined);
+    const old = typeof obj.surface === "string" && oldSurfaces.hasOwnProperty(obj.surface) ? oldSurfaces[obj.surface] : null;
+    const needsLines = obj.lines === undefined && (obj.surface !== undefined || obj.border !== undefined || obj.borderStyle !== undefined);
     if (!old && !needsLines && obj.border !== "none") return obj;
-    var out = {};
-    for (var k in obj) if (k !== "__proto__" && k !== "borderStyle") out[k] = obj[k];
-    var wasNone = obj.border === "none";
-    var fromOutline = wasNone ? "none" : (obj.borderStyle === "double" ? "double" : "solid");
+    const out = {};
+    for (const k in obj) if (k !== "__proto__" && k !== "borderStyle") out[k] = obj[k];
+    const wasNone = obj.border === "none";
+    const fromOutline = wasNone ? "none" : (obj.borderStyle === "double" ? "double" : "solid");
     if (old) out.surface = old[0];
     if (needsLines) {
-        var l = old ? old[1] : "*";
+        let l = old ? old[1] : "*";
         // a surface that was a line always had one, in the accent if the outline was off
         if (l === "*solid") l = obj.borderStyle === "double" ? "double" : "solid";
         else if (l === "*") l = fromOutline;
@@ -602,12 +602,12 @@ function migrate(obj) {
 // Only the look keys of an object, each one checked. Used for saved looks,
 // presets and imports, so none of them can carry anything else.
 function cleanLook(obj) {
-    var out = {};
+    const out = {};
     if (!obj || typeof obj !== "object" || Array.isArray(obj)) return out;
     obj = migrate(obj);
-    for (var i = 0; i < lookKeys.length; i++) {
-        var k = lookKeys[i];
-        var v = obj[k];
+    for (let i = 0; i < lookKeys.length; i++) {
+        const k = lookKeys[i];
+        const v = obj[k];
         if (v === undefined || typeof v === "function" || (v !== null && typeof v === "object")) continue;
         out[k] = clean(k, v);
     }
@@ -616,19 +616,19 @@ function cleanLook(obj) {
 
 // a look with every key filled in (for the one step undo)
 function cleanLookAll(obj) {
-    var out = cleanLook(obj);
-    for (var i = 0; i < lookKeys.length; i++) if (out[lookKeys[i]] === undefined) out[lookKeys[i]] = clean(lookKeys[i], undefined);
+    const out = cleanLook(obj);
+    for (let i = 0; i < lookKeys.length; i++) if (out[lookKeys[i]] === undefined) out[lookKeys[i]] = clean(lookKeys[i], undefined);
     return out;
 }
 
 // The saved looks: always LOOK_SLOTS places, each null or a checked look
 function cleanLooks(value) {
-    var out = [];
-    for (var i = 0; i < LOOK_SLOTS; i++) {
-        var v = Array.isArray(value) && i < value.length ? value[i] : null;
-        var look = v ? cleanLook(v) : null;
-        var any = false;
-        for (var k in look) { any = true; break; }
+    const out = [];
+    for (let i = 0; i < LOOK_SLOTS; i++) {
+        const v = Array.isArray(value) && i < value.length ? value[i] : null;
+        const look = v ? cleanLook(v) : null;
+        let any = false;
+        for (const k in look) { any = true; break; }
         out.push(any ? look : null);
     }
     return out;
@@ -637,17 +637,17 @@ function cleanLooks(value) {
 // A look written by `export`, read back by `import`. Text only, kept small.
 function parseLook(text) {
     if (typeof text !== "string" || text.length === 0 || text.length > 16384) return null;
-    var parsed = null;
+    let parsed = null;
     try { parsed = JSON.parse(text); } catch (e) { return null; }
-    var look = cleanLook(parsed);
-    for (var k in look) return look;
+    const look = cleanLook(parsed);
+    for (const k in look) return look;
     return null;
 }
 
 // The current look out of a resolved config
 function lookOf(cfg) {
-    var out = {};
-    for (var i = 0; i < lookKeys.length; i++) out[lookKeys[i]] = cfg[lookKeys[i]];
+    const out = {};
+    for (let i = 0; i < lookKeys.length; i++) out[lookKeys[i]] = cfg[lookKeys[i]];
     return out;
 }
 
@@ -655,10 +655,10 @@ function lookOf(cfg) {
 function resolve(saved) {
     if (!saved) saved = {};
     saved = migrate(saved);
-    var result = {};
+    const result = {};
     // only our own keys are read from the file
-    for (var key in defaults) {
-        var value = typeof saved === "object" ? saved[key] : undefined;
+    for (const key in defaults) {
+        let value = typeof saved === "object" ? saved[key] : undefined;
         if (typeof value === "function") value = undefined;
         result[key] = clean(key, value);
     }

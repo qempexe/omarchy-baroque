@@ -100,33 +100,33 @@ Item {
         onAcChanged: requestPaint()
         Component.onCompleted: requestPaint()
         function part(key) { return Surfaces.byKey[key] || Surfaces.byKey.filled }
-        function fillOf(key) { var f = part(key).fill; return typeof f === "number" ? f : 1 }
+        function fillOf(key) { const f = part(key).fill; return typeof f === "number" ? f : 1 }
         function ownShadow(key) { return part(key).ownShadow === true }
         function noFill(key) { return part(key).noFill === true }
         onPaint: {
-            var ctx = getContext("2d")
+            const ctx = getContext("2d")
             ctx.reset()
-            var ink = root.ink, soft = root.soft
+            const ink = root.ink, soft = root.soft
             if (root.key === "pointing") {
                 // the left and the right group, pointing the way this option makes them
-                var kind = Ends.byKey[endsNow] && Ends.byKey[endsNow].pointing ? endsNow : "arrow"
-                var o = root.opt
-                var dl = o === "outward" ? "left" : (o === "inward" ? "right" : o)
-                var dr = o === "outward" ? "right" : (o === "inward" ? "left" : o)
-                var two = o === "outward" || o === "inward"
-                var parts = two ? [[0, 31, dl], [33, 31, dr]] : [[6, 52, o]]
-                for (var i = 0; i < parts.length; i++)
+                const kind = Ends.byKey[endsNow] && Ends.byKey[endsNow].pointing ? endsNow : "arrow"
+                const o = root.opt
+                const dl = o === "outward" ? "left" : (o === "inward" ? "right" : o)
+                const dr = o === "outward" ? "right" : (o === "inward" ? "left" : o)
+                const two = o === "outward" || o === "inward"
+                const parts = two ? [[0, 31, dl], [33, 31, dr]] : [[6, 52, o]]
+                for (let i = 0; i < parts.length; i++)
                     Paint.paint(ctx, { keep: true, ox: parts[i][0], oy: 0, width: parts[i][1], height: height, margin: 4,
                                        r: 0, ends: kind, dir: parts[i][2], edge: "", inner: "end", surface: "filled",
                                        fill: soft, fill2: "", line: "", lineWidth: 0 })
                 return
             }
-            var isEnds = root.key === "ends"
+            const isEnds = root.key === "ends"
             // each tile shows only its own part: a surface with no lines, lines over a
             // faint surface, an ornament on a plain one
-            var surface = root.key === "surface" ? root.opt : (root.key === "lines" ? "faint" : "filled")
-            var lines = root.key === "lines" ? root.opt : "none"
-            var orn = root.key === "ornaments" ? root.opt : "none"
+            const surface = root.key === "surface" ? root.opt : (root.key === "lines" ? "faint" : "filled")
+            const lines = root.key === "lines" ? root.opt : "none"
+            const orn = root.key === "ornaments" ? root.opt : "none"
             Paint.paint(ctx, {
                 keep: true, ox: 0, oy: 0, width: width, height: height, margin: 4,
                 r: isEnds ? (root.opt === "capsule" ? 9 : (root.opt === "square" ? 0 : 5)) : 5,
@@ -154,7 +154,7 @@ Item {
             })
             if ((root.key === "surface" && noFill(surface)) || (root.key !== "surface" && root.opt === "none" && !isEnds)) {
                 ctx.fillStyle = Qt.rgba(ink.r, ink.g, ink.b, 0.5)
-                for (var i = 0; i < 3; i++) ctx.fillRect(14 + i * 14, 12, 6, 2)
+                for (let i = 0; i < 3; i++) ctx.fillRect(14 + i * 14, 12, 6, 2)
             }
         }
     }

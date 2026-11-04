@@ -56,7 +56,7 @@ Item {
     readonly property string position: {
         if (bar && ["top", "bottom", "left", "right"].indexOf(bar.position) !== -1) return bar.position
         try {
-            var a = win.anchors
+            const a = win.anchors
             if (vertical) return a.right && !a.left ? "right" : "left"
             return a.bottom && !a.top ? "bottom" : "top"
         } catch (e) { return vertical ? "left" : "top" }
@@ -73,9 +73,9 @@ Item {
     readonly property real normalMargin: Style.space(8)
 
     function findWindow() {
-        var item = deco.anchorItem
+        const item = deco.anchorItem
         if (!item) return false
-        var w = null, c = null
+        let w = null, c = null
         try {
             if (item.QsWindow) { w = item.QsWindow.window; c = item.QsWindow.contentItem }
         } catch (e) { w = null; c = null }
@@ -105,7 +105,7 @@ Item {
     // older bars: the item right under the window's root that holds the widget groups
     function findHost(found) {
         if (!deco.content || found.sections.length === 0) return null
-        var it = found.sections[0], guard = 0
+        let it = found.sections[0], guard = 0
         while (it && it.parent && it.parent !== deco.content && guard++ < 20) it = it.parent
         return it && it.parent === deco.content && it.anchors ? it : null
     }
@@ -118,21 +118,21 @@ Item {
     // thin strip along the window's edge, the window being as big as the screen
     function findStrip(found) {
         if (!deco.content || found.sections.length === 0) return null
-        var it = found.sections[0], cand = null, guard = 0
+        let it = found.sections[0], cand = null, guard = 0
         while (it && it.parent && it.parent !== deco.content && guard++ < 20) it = it.parent
         if (!it || it.parent !== deco.content) return null
         cand = it
-        var along = deco.content.width > deco.content.height
-        var thin = Math.min(cand.width, cand.height)
-        var whole = Math.min(deco.content.width, deco.content.height)
+        const along = deco.content.width > deco.content.height
+        const thin = Math.min(cand.width, cand.height)
+        const whole = Math.min(deco.content.width, deco.content.height)
         // a bar strip is far thinner than its window; on older bars the two are the same
         if (thin <= 0 || thin > whole * 0.5 || whole - thin < 8) return null
         return cand
     }
     function findStripBg(st) {
-        var kids = st ? st.children : []
-        for (var i = 0; i < kids.length; i++) {
-            var k = kids[i]
+        const kids = st ? st.children : []
+        for (let i = 0; i < kids.length; i++) {
+            const k = kids[i]
             if (k && k !== deco.drawing && typeof k.color !== "undefined" && k.width >= st.width - 1 && k.height >= st.height - 1
                     && typeof k.radius === "number") return k
         }
@@ -149,22 +149,22 @@ Item {
     // walks the window's items once, collecting slots, the two end sections and
     // every list of widgets
     function collect() {
-        var out = { slots: [], sections: [], lists: [] }
+        const out = { slots: [], sections: [], lists: [] }
         if (!deco.content) return out
-        var stack = [{ it: deco.content, depth: 0 }]
-        var seen = 0
+        const stack = [{ it: deco.content, depth: 0 }]
+        let seen = 0
         while (stack.length > 0 && seen < 4000) {
-            var top = stack.pop()
-            var it = top.it
+            const top = stack.pop()
+            const it = top.it
             seen++
             if (!it || it === deco.drawing) continue
             if (isSlot(it)) { out.slots.push(it); continue }
             if (isSection(it)) out.sections.push(it)
             if (isList(it)) out.lists.push(it)
             if (top.depth > 14) continue
-            var kids = it.children
+            const kids = it.children
             if (!kids) continue
-            for (var i = 0; i < kids.length; i++) stack.push({ it: kids[i], depth: top.depth + 1 })
+            for (let i = 0; i < kids.length; i++) stack.push({ it: kids[i], depth: top.depth + 1 })
         }
         return out
     }
@@ -176,12 +176,12 @@ Item {
     }
 
     function applyStrip(found, thick) {
-        var st = deco.strip, c = deco.content
+        const st = deco.strip, c = deco.content
         if (!deco.stripBg) deco.stripBg = findStripBg(st)
         if (deco.stripBg) setIfDifferent(deco.stripBg, "visible", false)
-        var t = deco.barSize, g = deco.floatGap, inner = thick - g
+        const t = deco.barSize, g = deco.floatGap, inner = thick - g
         // the strip sits in the middle of the shapes, so the widgets stay centred in them
-        var off = deco.barHidden ? 0 : g + Math.max(0, Math.round((inner - t) / 2))
+        const off = deco.barHidden ? 0 : g + Math.max(0, Math.round((inner - t) / 2))
         if (deco.vertical) {
             setIfDifferent(st, "x", deco.position === "right" ? c.width - t - off : off)
             deco.bandX = deco.position === "right" ? c.width - thick : g
@@ -196,10 +196,10 @@ Item {
     }
 
     function applyWindow(found) {
-        var w = deco.win
+        const w = deco.win
         // a hidden bar parks itself one bar size past the edge: keep the window
         // that size then, so no strip of it is left on screen
-        var thick = deco.barHidden ? deco.barSize : Shapes.thicknessFor(deco.barSize, deco.cfg) + deco.floatGap
+        const thick = deco.barHidden ? deco.barSize : Shapes.thicknessFor(deco.barSize, deco.cfg) + deco.floatGap
         if (deco.strip) applyStrip(found, thick)
         else {
             try { if (w.color.a !== 0) w.color = "transparent" } catch (e) { }
@@ -208,25 +208,25 @@ Item {
             // the widget row moves off the screen edge by the gap, and the shapes with it
             if (!deco.host) deco.host = findHost(found)
             if (deco.host) setIfDifferent(deco.host.anchors, edgeMarginName(), deco.floatGap)
-            var c = deco.content, g = deco.floatGap
+            const c = deco.content, g = deco.floatGap
             deco.bandX = deco.position === "left" ? g : 0
             deco.bandY = deco.position === "top" ? g : 0
             deco.bandW = c.width - (deco.vertical ? g : 0)
             deco.bandH = c.height - (deco.vertical ? 0 : g)
         }
 
-        var m = Shapes.sectionMargin(deco.cfg, deco.normalMargin, deco.barSize)
+        const m = Shapes.sectionMargin(deco.cfg, deco.normalMargin, deco.barSize)
         // widget pills: room between the widgets for each pill's sides and the gap
-        var spacing = Shapes.pillSpacing(deco.cfg, deco.barSize)
+        let spacing = Shapes.pillSpacing(deco.cfg, deco.barSize)
         if (spacing > 0) spacing = fitSpacing(found, spacing, m)
-        for (var i = 0; i < found.sections.length; i++) {
-            var s = found.sections[i]
-            var side = s.region === "left" ? (deco.vertical ? "topMargin" : "leftMargin")
+        for (let i = 0; i < found.sections.length; i++) {
+            const s = found.sections[i]
+            const side = s.region === "left" ? (deco.vertical ? "topMargin" : "leftMargin")
                                            : (deco.vertical ? "bottomMargin" : "rightMargin")
             setIfDifferent(s.anchors, side, m)
         }
-        for (var j = 0; j < found.lists.length; j++) {
-            var row = found.lists[j].item
+        for (let j = 0; j < found.lists.length; j++) {
+            const row = found.lists[j].item
             if (row && typeof row.spacing === "number") setIfDifferent(row, "spacing", spacing)
         }
         deco.applied = true
@@ -234,15 +234,15 @@ Item {
 
     // widget pills: never so much room that a group runs into the next one
     function fitSpacing(found, want, margin) {
-        var groups = { left: { sum: 0, n: 0 }, center: { sum: 0, n: 0 }, right: { sum: 0, n: 0 } }
-        for (var i = 0; i < found.slots.length; i++) {
-            var s = found.slots[i]
-            var g = groups[s.region]
+        const groups = { left: { sum: 0, n: 0 }, center: { sum: 0, n: 0 }, right: { sum: 0, n: 0 } }
+        for (let i = 0; i < found.slots.length; i++) {
+            const s = found.slots[i]
+            const g = groups[s.region]
             if (!g || !s.visible) continue
-            var len = lengthOf(s)
+            const len = lengthOf(s)
             if (len > 0) { g.sum += len; g.n++ }
         }
-        var length = deco.content ? (deco.vertical ? deco.content.height : deco.content.width) : 0
+        const length = deco.content ? (deco.vertical ? deco.content.height : deco.content.width) : 0
         return Shapes.fitSpacing(want, length, margin, groups, Shapes.pillRoom(deco.cfg, deco.barSize),
                                  Math.max(8, deco.cfg.pillGap + 6))
     }
@@ -250,15 +250,15 @@ Item {
     // 4.5 and later: the strip goes back to its edge and its background comes back, both
     // following the strip again, and the reserved zone follows the strip's thickness
     function giveBackStrip() {
-        var st = deco.strip, bg = deco.stripBg, w = deco.win
-        var pos = deco.position, vert = deco.vertical
+        const st = deco.strip, bg = deco.stripBg, w = deco.win
+        const pos = deco.position, vert = deco.vertical
         if (bg) setIfDifferent(bg, "visible", true)
         if (st) {
             try {
-                if (vert) st.x = Qt.binding(function() { return pos === "right" && st.parent ? st.parent.width - st.width : 0 })
-                else st.y = Qt.binding(function() { return pos === "bottom" && st.parent ? st.parent.height - st.height : 0 })
+                if (vert) st.x = Qt.binding(() => pos === "right" && st.parent ? st.parent.width - st.width : 0)
+                else st.y = Qt.binding(() => pos === "bottom" && st.parent ? st.parent.height - st.height : 0)
             } catch (e) { }
-            try { if (w) w.exclusiveZone = Qt.binding(function() { return vert ? st.width : st.height }) } catch (e2) { }
+            try { if (w) w.exclusiveZone = Qt.binding(() => vert ? st.width : st.height) } catch (e2) { }
         }
     }
 
@@ -271,22 +271,22 @@ Item {
         if (deco.drawing) { deco.drawing.destroy(); deco.drawing = null }
         if (!deco.applied) return
         deco.applied = false
-        var clear = deco.bar && deco.bar.transparent === true
-        var found = collect()
+        const clear = deco.bar && deco.bar.transparent === true
+        const found = collect()
         if (deco.strip) {
-            for (var n = 0; n < found.lists.length; n++) {
-                var r2 = found.lists[n].item
+            for (let n = 0; n < found.lists.length; n++) {
+                const r2 = found.lists[n].item
                 if (r2 && typeof r2.spacing === "number") setIfDifferent(r2, "spacing", 0)
             }
             giveBackStrip()
-            for (var m2 = 0; m2 < found.sections.length; m2++) {
+            for (let m2 = 0; m2 < found.sections.length; m2++) {
                 if (deco.svc && typeof deco.svc.giveBackMargins === "function") deco.svc.giveBackMargins(found.sections[m2].anchors)
             }
             return
         }
         // the stock bar lays its widgets out with no spacing
-        for (var k = 0; k < found.lists.length; k++) {
-            var row = found.lists[k].item
+        for (let k = 0; k < found.lists.length; k++) {
+            const row = found.lists[k].item
             if (row && typeof row.spacing === "number") setIfDifferent(row, "spacing", 0)
         }
         if (deco.host) {
@@ -295,17 +295,17 @@ Item {
         }
         if (deco.svc && typeof deco.svc.giveBackWindow === "function") {
             if (deco.win) deco.svc.giveBackWindow(deco.win, clear)
-            for (var i = 0; i < found.sections.length; i++) deco.svc.giveBackMargins(found.sections[i].anchors)
+            for (let i = 0; i < found.sections.length; i++) deco.svc.giveBackMargins(found.sections[i].anchors)
             return
         }
-        var w = deco.win
+        const w = deco.win
         if (w) {
             try { w.color = clear ? "transparent" : Color.bar.background } catch (e) { }
             try { w.implicitHeight = Style.bar.sizeHorizontal } catch (e2) { }
             try { w.implicitWidth = Style.bar.sizeVertical } catch (e3) { }
         }
-        for (var j = 0; j < found.sections.length; j++) {
-            var a = found.sections[j].anchors
+        for (let j = 0; j < found.sections.length; j++) {
+            const a = found.sections[j].anchors
             try {
                 a.leftMargin = deco.normalMargin; a.rightMargin = deco.normalMargin
                 a.topMargin = deco.normalMargin; a.bottomMargin = deco.normalMargin
@@ -322,19 +322,19 @@ Item {
     // Nothing is drawn there, so neither is a shape: only what the drawer shows
     // counts. A tray that grows with its drawer has no such room, and keeps all of it.
     function trayIn(s) {
-        var w = s ? s.activeItem : null
+        const w = s ? s.activeItem : null
         if (!w || w.moduleName !== "omarchy.tray") return null
         if (typeof w.drawerExtent !== "number" || typeof w.revealExtent !== "number") return null
         return w
     }
     function trayRoom(s) {
-        var w = trayIn(s)
+        const w = trayIn(s)
         if (!w) return 0
-        var kids = w.children || []
-        for (var i = 0; i < kids.length; i++) {
-            var it = kids[i] ? kids[i].item : null
+        const kids = w.children || []
+        for (let i = 0; i < kids.length; i++) {
+            const it = kids[i] ? kids[i].item : null
             if (it && (typeof it.drawerBlockWidth === "number" || typeof it.drawerBlockHeight === "number")) {
-                var block = deco.vertical ? it.drawerBlockHeight : it.drawerBlockWidth
+                const block = deco.vertical ? it.drawerBlockHeight : it.drawerBlockWidth
                 return block > 0 ? Math.max(0, w.drawerExtent - w.revealExtent) : 0
             }
         }
@@ -346,14 +346,14 @@ Item {
     }
 
     function measure(found) {
-        var slots = []
-        for (var i = 0; i < found.slots.length; i++) {
-            var s = found.slots[i]
+        const slots = []
+        for (let i = 0; i < found.slots.length; i++) {
+            const s = found.slots[i]
             if (!s.visible || s.width <= 0 || s.height <= 0) continue
-            var len = lengthOf(s)
+            const len = lengthOf(s)
             if (len <= 0) continue
-            var p = s.mapToItem(deco.content, 0, 0)
-            var lead = (deco.vertical ? s.height : s.width) - len
+            const p = s.mapToItem(deco.content, 0, 0)
+            const lead = (deco.vertical ? s.height : s.width) - len
             slots.push({
                 a: (deco.vertical ? p.y : p.x) + lead,
                 len: len,
@@ -368,7 +368,7 @@ Item {
     function hidden() {
         // the stock bar parks itself past the screen edge when hidden
         try {
-            var m = deco.win.margins
+            const m = deco.win.margins
             return m.top < 0 || m.bottom < 0 || m.left < 0 || m.right < 0
         } catch (e) { return false }
     }
@@ -379,10 +379,10 @@ Item {
     property int ticks: 0
     function cached() {
         deco.ticks++
-        var c = deco.cache
-        var stale = !c || deco.ticks % 12 === 0
+        let c = deco.cache
+        let stale = !c || deco.ticks % 12 === 0
         if (!stale) {
-            for (var i = 0; i < c.slots.length; i++)
+            for (let i = 0; i < c.slots.length; i++)
                 if (!c.slots[i] || !c.slots[i].parent) { stale = true; break }
         }
         if (stale) { c = collect(); watch(c); deco.cache = c }
@@ -399,7 +399,7 @@ Item {
     function poke() {
         if (deco.alive !== true || deco.poked) return
         deco.poked = true
-        Qt.callLater(function() {
+        Qt.callLater(() => {
             if (deco.alive !== true) return
             deco.poked = false
             deco.refresh()
@@ -407,16 +407,16 @@ Item {
     }
     function watch(found) {
         unwatch()
-        var list = []
-        for (var i = 0; i < found.slots.length; i++) {
-            var s = found.slots[i]
+        const list = []
+        for (let i = 0; i < found.slots.length; i++) {
+            const s = found.slots[i]
             try {
                 s.widthChanged.connect(deco.poke); s.heightChanged.connect(deco.poke)
                 s.xChanged.connect(deco.poke); s.yChanged.connect(deco.poke)
                 s.visibleChanged.connect(deco.poke)
                 if (s.hoveredChanged) s.hoveredChanged.connect(deco.poke)
                 if (s.panelOpenChanged) s.panelOpenChanged.connect(deco.poke)
-                var t = trayIn(s)
+                const t = trayIn(s)
                 if (t) t.revealExtentChanged.connect(deco.poke)
                 list.push(s)
             } catch (e) { }
@@ -424,16 +424,16 @@ Item {
         deco.watched = list
     }
     function unwatch() {
-        var list = deco.watched
-        for (var i = 0; i < list.length; i++) {
-            var s = list[i]
+        const list = deco.watched
+        for (let i = 0; i < list.length; i++) {
+            const s = list[i]
             try {
                 s.widthChanged.disconnect(deco.poke); s.heightChanged.disconnect(deco.poke)
                 s.xChanged.disconnect(deco.poke); s.yChanged.disconnect(deco.poke)
                 s.visibleChanged.disconnect(deco.poke)
                 if (s.hoveredChanged) s.hoveredChanged.disconnect(deco.poke)
                 if (s.panelOpenChanged) s.panelOpenChanged.disconnect(deco.poke)
-                var t = trayIn(s)
+                const t = trayIn(s)
                 if (t) t.revealExtentChanged.disconnect(deco.poke)
             } catch (e) { }
         }
@@ -448,7 +448,7 @@ Item {
             return
         }
         if (!deco.content && !findWindow()) { setState("lost"); return }
-        var found = cached()
+        const found = cached()
         if (!deco.strip && found.slots.length > 0) deco.strip = findStrip(found)
         // nothing that looks like the stock bar: leave it alone
         if (found.slots.length === 0) { deco.cache = null; restore(); setState("lost"); return }
@@ -457,27 +457,27 @@ Item {
         if (!deco.drawing) deco.drawing = layerComponent.createObject(deco.content, { z: -1000 })
         setState("ok")
 
-        var view = {
+        const view = {
             length: deco.vertical ? deco.content.height : deco.content.width,
             thickness: deco.vertical ? deco.bandW : deco.bandH,
             barSize: deco.barSize,
             edgeAtStart: deco.edgeAtStart
         }
-        var slots = measure(found)
-        var busy = false
-        for (var q = 0; q < slots.length; q++) if (slots[q].hovered || slots[q].open) busy = true
+        const slots = measure(found)
+        let busy = false
+        for (let q = 0; q < slots.length; q++) if (slots[q].hovered || slots[q].open) busy = true
         deco.inUse = busy
         // the stock bar's own transparency, checked every time (it can change on its own)
         if (deco.svc && deco.bar && typeof deco.bar.transparent === "boolean"
                 && deco.svc.stockTransparent !== deco.bar.transparent)
             deco.svc.stockTransparent = deco.bar.transparent
 
-        var out = Shapes.layout(view, slots, deco.cfg)
-        var key = JSON.stringify(out) + "|" + deco.vertical + deco.position
+        const out = Shapes.layout(view, slots, deco.cfg)
+        const key = JSON.stringify(out) + "|" + deco.vertical + deco.position
         if (key === deco.lastKey) return
         deco.lastKey = key
-        sync(baseModel, out.shapes.filter(function(s) { return s.role === "base" }))
-        sync(markModel, out.shapes.filter(function(s) { return s.role !== "base" }))
+        sync(baseModel, out.shapes.filter(s => s.role === "base"))
+        sync(markModel, out.shapes.filter(s => s.role !== "base"))
         sync(dividerModel, out.dividers)
         sync(separatorModel, out.separators)
     }
@@ -499,9 +499,9 @@ Item {
 
     // the models are updated in place so the shapes glide instead of jumping
     function sync(model, list) {
-        for (var i = 0; i < list.length; i++) {
-            var it = list[i]
-            var row = {
+        for (let i = 0; i < list.length; i++) {
+            const it = list[i]
+            const row = {
                 a: it.a, len: it.len !== undefined ? it.len : 0,
                 c: it.c, w: it.w, r: it.r !== undefined ? it.r : 0,
                 role: it.role !== undefined ? it.role : "mark",
@@ -511,8 +511,8 @@ Item {
             }
             if (i >= model.count) { model.append(row); continue }
             // only what changed, so nothing repaints for nothing
-            var old = model.get(i)
-            for (var k in row) if (old[k] !== row[k]) model.setProperty(i, k, row[k])
+            const old = model.get(i)
+            for (const k in row) if (old[k] !== row[k]) model.setProperty(i, k, row[k])
         }
         if (model.count > list.length) model.remove(list.length, model.count - list.length)
     }
@@ -546,7 +546,7 @@ Item {
         return Qt.rgba(a.r * (1 - t) + b.r * t, a.g * (1 - t) + b.g * t, a.b * (1 - t) + b.b * t, 1)
     }
     function css(c, alpha) {
-        var a = Math.max(0, Math.min(1, alpha))
+        const a = Math.max(0, Math.min(1, alpha))
         return "rgba(" + Math.round(c.r * 255) + "," + Math.round(c.g * 255) + "," + Math.round(c.b * 255) + "," + a.toFixed(3) + ")"
     }
     readonly property color accent: ui ? ui.accent : "white"
@@ -564,7 +564,7 @@ Item {
     }
     // where a shape sits along the bar, 0 to 1
     function along(a, len) {
-        var total = deco.content ? (deco.vertical ? deco.content.height : deco.content.width) : 0
+        const total = deco.content ? (deco.vertical ? deco.content.height : deco.content.width) : 0
         return total > 0 ? Math.max(0, Math.min(1, (a + len / 2) / total)) : 0.5
     }
 
@@ -580,9 +580,9 @@ Item {
         return deco.accent
     }
     function borderGradCss(alpha) {
-        var out = []
-        var list = deco.borderColors.length > 0 ? deco.borderColors : []
-        for (var i = 0; i < list.length; i++) out.push(css(Qt.color(list[i]), alpha))
+        const out = []
+        const list = deco.borderColors.length > 0 ? deco.borderColors : []
+        for (let i = 0; i < list.length; i++) out.push(css(Qt.color(list[i]), alpha))
         return out
     }
     function nextPaletteColor(index) {
@@ -591,7 +591,7 @@ Item {
     }
     // which way slanted, arrow, leaf and stepped ends point for a group
     function dirFor(region) {
-        var p = cfg ? cfg.pointing : "right"
+        const p = cfg ? cfg.pointing : "right"
         if (p === "outward") return region === "left" ? "left" : (region === "right" ? "right" : "both")
         if (p === "inward") return region === "left" ? "right" : (region === "right" ? "left" : "both")
         return p === "left" || p === "both" ? p : "right"
@@ -606,23 +606,23 @@ Item {
 
     // everything a shape's canvas needs to paint itself
     function paramsFor(index, region, wPx, hPx, r, attached, t) {
-        var c = deco.cfg
+        const c = deco.cfg
         if (!c) return { width: 0, height: 0 }
-        var mine = accentFor(index, region, t)
-        var palFill = c.colorMode === "palette" && c.paletteUse === "fill"
-        var tint = c.barTint / 100 + (palFill ? 0.22 : 0) + (region === "center" && c.centerStyle === "tinted" ? 0.18 : 0)
-        var base = mix(deco.surfaceColor, palFill ? mine : deco.accent, Math.min(0.6, tint))
-        var surf = c.surface
-        var lines = c.lines
+        const mine = accentFor(index, region, t)
+        const palFill = c.colorMode === "palette" && c.paletteUse === "fill"
+        const tint = c.barTint / 100 + (palFill ? 0.22 : 0) + (region === "center" && c.centerStyle === "tinted" ? 0.18 : 0)
+        const base = mix(deco.surfaceColor, palFill ? mine : deco.accent, Math.min(0.6, tint))
+        const surf = c.surface
+        let lines = c.lines
         // how much of the fill each surface shows
-        var S = Surfaces.byKey[surf] || Surfaces.byKey.filled
-        var k = typeof S.fill === "number" ? S.fill : 1
+        const S = Surfaces.byKey[surf] || Surfaces.byKey.filled
+        let k = typeof S.fill === "number" ? S.fill : 1
         if (c.fill === "glass") k *= 0.55
-        var alpha = k * c.barOpacity / 100
+        const alpha = k * c.barOpacity / 100
         // the window border gradient: the fill runs from its first color to its last
-        var borderFill = c.gradientTo === "border" && c.fill === "gradient"
-        var fillFrom = borderFill ? mix(base, borderAt(0), 0.35) : base
-        var target = borderFill ? mix(base, borderAt(1), 0.35)
+        const borderFill = c.gradientTo === "border" && c.fill === "gradient"
+        const fillFrom = borderFill ? mix(base, borderAt(0), 0.35) : base
+        const target = borderFill ? mix(base, borderAt(1), 0.35)
                    : c.gradientTo === "palette" ? mix(base, nextPaletteColor(index), 0.55)
                    : c.gradientTo === "lighter" ? mix(base, Qt.rgba(1, 1, 1, 1), 0.2)
                    : c.gradientTo === "darker" ? mix(base, Qt.rgba(0, 0, 0, 1), 0.35)
@@ -630,43 +630,43 @@ Item {
 
         // lines: the edge of the shape, in the line color. An accented center gets
         // an accent line even when the others have none
-        var lw = 0
-        var lineBase = mine, lineAlpha = 0.85
-        var border = c.border
+        let lw = 0
+        let lineBase = mine, lineAlpha = 0.85
+        let border = c.border
         if (region === "center" && c.centerStyle === "accent") {
             border = "accent"
             if (lines === "none") lines = "solid"
         }
-        var Ln = Lines.byKey[lines] || Lines.byKey.none
-        var wantsLine = Ln.usesColor !== false
+        const Ln = Lines.byKey[lines] || Lines.byKey.none
+        const wantsLine = Ln.usesColor !== false
         if (wantsLine) {
             lw = c.borderWidth
             if (border === "text") { lineBase = Color.bar.text; lineAlpha = 0.55 }
             else if (border === "subtle") { lineBase = ui ? ui.fg : Qt.rgba(1, 1, 1, 1); lineAlpha = 0.16 }
             else { lineBase = mine; lineAlpha = 0.85 }          // accent and window border
         }
-        var lineColor = wantsLine ? css(lineBase, lineAlpha) : ""
+        const lineColor = wantsLine ? css(lineBase, lineAlpha) : ""
 
         // gradient outline: from the line's own color into a second one, or the window
         // border's colors. Rails and brackets fade the same way
-        var gradOn = c.outlineGradient === true
-        var gradAngle = c.outlineGradientDir === "across" ? 90 : c.outlineGradientDir === "diagonal" ? 45
+        const gradOn = c.outlineGradient === true
+        const gradAngle = c.outlineGradientDir === "across" ? 90 : c.outlineGradientDir === "diagonal" ? 45
                       : c.outlineGradientDir === "theme" ? deco.borderAngle : 0
         function fadeFrom(from, alpha) {
             if (c.outlineGradientTo === "border" && deco.borderColors.length > 0) return deco.borderGradCss(Math.max(alpha, 0.6))
-            var to = c.outlineGradientTo === "accent" ? mine
+            const to = c.outlineGradientTo === "accent" ? mine
                    : c.outlineGradientTo === "palette" ? nextPaletteColor(index)
                    : mix(from, Qt.rgba(1, 1, 1, 1), 0.55)
             return [css(from, alpha), css(to, Math.max(alpha, 0.6))]
         }
-        var lineGrad = []
+        let lineGrad = []
         if (lw > 0 && border === "border" && deco.borderColors.length > 1 && !gradOn) lineGrad = deco.borderGradCss(0.9)
         else if (lw > 0 && gradOn) lineGrad = fadeFrom(lineBase, lineAlpha)
-        var markGrad = gradOn ? fadeFrom(mine, 0.9) : []
-        var lineAngleNow = gradOn ? gradAngle : deco.borderAngle
+        const markGrad = gradOn ? fadeFrom(mine, 0.9) : []
+        const lineAngleNow = gradOn ? gradAngle : deco.borderAngle
 
         // shadow or glow
-        var blur = 0, shadow = "", shadowQ = Qt.rgba(0, 0, 0, 0)
+        let blur = 0, shadow = "", shadowQ = Qt.rgba(0, 0, 0, 0)
         function setShadow(col, a, b) { blur = b; shadow = css(col, a); shadowQ = Qt.rgba(col.r, col.g, col.b, a) }
         if (Shapes.floating(c) && c.shadow !== "none") {
             if (c.shadowColor === "accent") setShadow(mine, c.shadow === "strong" ? 0.8 : 0.55, c.shadow === "strong" ? 14 : 8)
@@ -676,13 +676,13 @@ Item {
         // the shadow surface is nothing but a shadow, so it always has one
         if (S.ownShadow === true && blur === 0) setShadow(Qt.rgba(0, 0, 0, 1), 0.5, 10)
 
-        var edgeSide = deco.edgeAtStart ? "start" : "end"
-        var windowSide = deco.edgeAtStart ? "end" : "start"
-        var flat = c.flatSide === "edge" ? edgeSide : (c.flatSide === "windows" ? windowSide : "")
-        var fg = ui ? ui.fg : Qt.rgba(1, 1, 1, 1)
+        const edgeSide = deco.edgeAtStart ? "start" : "end"
+        const windowSide = deco.edgeAtStart ? "end" : "start"
+        const flat = c.flatSide === "edge" ? edgeSide : (c.flatSide === "windows" ? windowSide : "")
+        const fg = ui ? ui.fg : Qt.rgba(1, 1, 1, 1)
         // on a light shape, highlights go white and shadows soften
-        var lightBase = 0.299 * base.r + 0.587 * base.g + 0.114 * base.b > 0.6
-        var dense = S.noDepth !== true
+        const lightBase = 0.299 * base.r + 0.587 * base.g + 0.114 * base.b > 0.6
+        const dense = S.noDepth !== true
 
         return {
             width: wPx, height: hPx, margin: deco.margin, vertical: deco.vertical,
@@ -788,8 +788,8 @@ Item {
                         readonly property bool gpuShadow: params.shadowBlur > 0 && !params.ownShadow
                         readonly property var drawn: {
                             if (!gpuShadow) return params
-                            var q = {}
-                            for (var k in params) q[k] = params[k]
+                            const q = {}
+                            for (const k in params) q[k] = params[k]
                             q.shadowBlur = 0
                             return q
                         }

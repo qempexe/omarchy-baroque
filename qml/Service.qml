@@ -26,7 +26,7 @@ Item {
     readonly property var cfg: Schema.resolve(settingsStore.values)
 
     function setValue(key, value) {
-        var v = Schema.clean(key, value)
+        const v = Schema.clean(key, value)
         if (v === undefined) return
         // picking colors yourself makes them yours, a look won't take them back
         if (key === "colorMode" && root.cfg.presetColors !== "") settingsStore.setMany({ colorMode: v, presetColors: "" })
@@ -52,32 +52,32 @@ Item {
 
     // reset everything except your saved looks
     function resetAll() {
-        var next = {}
-        for (var k in Schema.defaults) next[k] = Schema.defaults[k]
+        const next = {}
+        for (const k in Schema.defaults) next[k] = Schema.defaults[k]
         next.savedLooks = root.cfg.savedLooks
         settingsStore.resetAll(next)
     }
 
     function applyPreset(key) {
-        var p = Schema.presetFor(Util.toText(key))
+        const p = Schema.presetFor(Util.toText(key))
         if (!p) return false
         // a look starts from the defaults, so nothing from the last one lingers.
         // your colors, the screen corners and the animation speed stay yours
-        var keep = ["colorMode", "customBg", "customFg", "accentColor", "paletteUse", "widgetText",
+        const keep = ["colorMode", "customBg", "customFg", "accentColor", "paletteUse", "widgetText",
                     "groupColors", "leftColor", "centerColor", "rightColor",
                     "speed", "easing", "idleOpacity", "fadeTime",
                     "corners", "cornerWhich", "cornerSize", "cornerColor",
                     "screenFrame", "screenFrameWidth", "screenFrameColor"]
-        var look = {}
-        for (var i = 0; i < Schema.lookKeys.length; i++) {
-            var k = Schema.lookKeys[i]
+        const look = {}
+        for (let i = 0; i < Schema.lookKeys.length; i++) {
+            const k = Schema.lookKeys[i]
             look[k] = keep.indexOf(k) !== -1 ? root.cfg[k] : Schema.defaults[k]
         }
         // colors a look brought along (Mono, Rainbow, Aurora) go when you switch to the
         // next one. Colors you picked yourself stay
         if (root.cfg.presetColors !== "" && look.colorMode === root.cfg.presetColors) look.colorMode = "theme"
-        var set = Schema.cleanLook(p.set)
-        for (var key in set) look[key] = set[key]
+        const set = Schema.cleanLook(p.set)
+        for (const key in set) look[key] = set[key]
         look.presetColors = set.colorMode !== undefined ? set.colorMode : ""
         look.undoLook = Schema.lookOf(root.cfg)
         look.lastLook = p.key
@@ -87,8 +87,8 @@ Item {
     }
     // the ready made look after the last one picked
     function nextLook() {
-        var i = -1
-        for (var k = 0; k < Schema.presets.length; k++) if (Schema.presets[k].key === root.cfg.lastLook) i = k
+        let i = -1
+        for (let k = 0; k < Schema.presets.length; k++) if (Schema.presets[k].key === root.cfg.lastLook) i = k
         root.applyPreset(Schema.presets[(i + 1) % Schema.presets.length].key)
         return root.cfg.lastLook
     }
@@ -96,7 +96,7 @@ Item {
     readonly property bool canUndo: root.cfg.undoLook !== null
     function undoLook() {
         if (!root.cfg.undoLook) return false
-        var look = Schema.cleanLookAll(root.cfg.undoLook)
+        const look = Schema.cleanLookAll(root.cfg.undoLook)
         look.undoLook = null
         look.lastLook = ""
         settingsStore.setMany(look)
@@ -107,23 +107,23 @@ Item {
 
     function saveLook(i) {
         if (!slotOk(i)) return false
-        var looks = root.cfg.savedLooks.slice()
+        const looks = root.cfg.savedLooks.slice()
         looks[i] = Schema.lookOf(root.cfg)
         root.setValue("savedLooks", looks)
         return true
     }
     // the first free place, or -1 when all are taken
     function freeLook() {
-        for (var i = 0; i < Schema.LOOK_SLOTS; i++) if (!root.cfg.savedLooks[i]) return i
+        for (let i = 0; i < Schema.LOOK_SLOTS; i++) if (!root.cfg.savedLooks[i]) return i
         return -1
     }
     function saveFreeLook() {
-        var i = root.freeLook()
+        const i = root.freeLook()
         return i >= 0 && root.saveLook(i) ? i : -1
     }
     function loadLook(i) {
         if (!slotOk(i) || !root.cfg.savedLooks[i]) return false
-        var look = Schema.cleanLook(root.cfg.savedLooks[i])
+        const look = Schema.cleanLook(root.cfg.savedLooks[i])
         look.undoLook = Schema.lookOf(root.cfg)
         look.enabled = true
         settingsStore.setMany(look)
@@ -131,7 +131,7 @@ Item {
     }
     function clearLook(i) {
         if (!slotOk(i)) return false
-        var looks = root.cfg.savedLooks.slice()
+        const looks = root.cfg.savedLooks.slice()
         looks[i] = null
         root.setValue("savedLooks", looks)
         return true
@@ -139,7 +139,7 @@ Item {
 
     function exportLook() { return JSON.stringify(Schema.lookOf(root.cfg)) }
     function importLook(text) {
-        var look = Schema.parseLook(text)
+        const look = Schema.parseLook(text)
         if (!look) return false
         look.undoLook = Schema.lookOf(root.cfg)
         settingsStore.setMany(look)
@@ -156,7 +156,7 @@ Item {
         watchChanges: true
         onFileChanged: reload()
         onLoaded: {
-            var t = ""
+            let t = ""
             try { t = typeof text === "function" ? text() : text } catch (e) { t = "" }
             root.themePalette = Theme.parsePalette(t)
         }
@@ -214,7 +214,7 @@ Item {
         try {
             if (root.barTextMode === "theme") {
                 if (!root.barTextOwned) return
-                Color.bar.text = Qt.binding(function() { return root.themeText() })
+                Color.bar.text = Qt.binding(() => root.themeText())
                 root.barTextOwned = false
                 return
             }
@@ -246,7 +246,7 @@ Item {
     readonly property real borderAngle: luaBorder.colors.length > 0 ? luaBorder.angle : confBorder.angle
 
     function fileText(fv) {
-        try { var t = typeof fv.text === "function" ? fv.text() : fv.text; return typeof t === "string" ? t : "" } catch (e) { return "" }
+        try { const t = typeof fv.text === "function" ? fv.text() : fv.text; return typeof t === "string" ? t : "" } catch (e) { return "" }
     }
     FileView {
         id: borderLua
@@ -281,17 +281,17 @@ Item {
     property var reports: ({})          // screen name -> "ok" | "lost"
     property bool stockTransparent: false
     readonly property int screens: {
-        var seen = []
-        for (var k in root.reports) {
+        const seen = []
+        for (const k in root.reports) {
             if (root.reports[k] !== "ok") continue
-            var screen = k.split("#")[0]
+            const screen = k.split("#")[0]
             if (seen.indexOf(screen) === -1) seen.push(screen)
         }
         return seen.length
     }
     readonly property string status: {
-        var any = false
-        for (var k in root.reports) {
+        let any = false
+        for (const k in root.reports) {
             any = true
             if (root.reports[k] === "ok") return "ok"
         }
@@ -305,10 +305,10 @@ Item {
     }
     // screens Baroque draws on: each button counts once, several on one screen once too
     function report(key, state) {
-        var name = typeof key === "string" && key !== "" ? key : "screen"
+        const name = typeof key === "string" && key !== "" ? key : "screen"
         if (root.reports[name] === state) return
-        var next = {}
-        for (var k in root.reports) next[k] = root.reports[k]
+        const next = {}
+        for (const k in root.reports) next[k] = root.reports[k]
         if (state === "") delete next[name]
         else next[name] = state
         root.reports = next
@@ -318,16 +318,16 @@ Item {
     // are made here because this service stays loaded: a binding made by a bar button
     // that is being removed would stop working with it.
     function giveBackWindow(w, clear) {
-        try { w.color = clear ? "transparent" : Qt.binding(function() { return Color.bar.background }) } catch (e) { }
-        try { w.implicitHeight = Qt.binding(function() { return Style.bar.sizeHorizontal }) } catch (e2) { }
-        try { w.implicitWidth = Qt.binding(function() { return Style.bar.sizeVertical }) } catch (e3) { }
+        try { w.color = clear ? "transparent" : Qt.binding(() => Color.bar.background) } catch (e) { }
+        try { w.implicitHeight = Qt.binding(() => Style.bar.sizeHorizontal) } catch (e2) { }
+        try { w.implicitWidth = Qt.binding(() => Style.bar.sizeVertical) } catch (e3) { }
     }
     function giveBackMargins(a) {
         try {
-            a.leftMargin = Qt.binding(function() { return Style.space(8) })
-            a.rightMargin = Qt.binding(function() { return Style.space(8) })
-            a.topMargin = Qt.binding(function() { return Style.space(8) })
-            a.bottomMargin = Qt.binding(function() { return Style.space(8) })
+            a.leftMargin = Qt.binding(() => Style.space(8))
+            a.rightMargin = Qt.binding(() => Style.space(8))
+            a.topMargin = Qt.binding(() => Style.space(8))
+            a.bottomMargin = Qt.binding(() => Style.space(8))
         } catch (e) { }
     }
 
@@ -342,15 +342,15 @@ Item {
 
     // a shape by name, or the next one
     function useShape(name) {
-        var shapes = Schema.itemFor("shape").options
+        const shapes = Schema.itemFor("shape").options
         if (shapes.indexOf(name) === -1) return false
         root.setValue("shape", name)
         if (!root.cfg.enabled) root.setValue("enabled", true)
         return true
     }
     function nextShape() {
-        var shapes = Schema.itemFor("shape").options
-        var i = shapes.indexOf(root.cfg.shape)
+        const shapes = Schema.itemFor("shape").options
+        const i = shapes.indexOf(root.cfg.shape)
         root.useShape(shapes[(i + 1) % shapes.length])
     }
 
@@ -368,7 +368,7 @@ Item {
         function nextLook(): string { return root.nextLook() }
         function undo(): string { return root.undoLook() ? "ok" : "nothing to undo" }
         function save(slot: int): string { return root.saveLook(slot - 1) ? "saved in " + slot : "places are 1 to " + Schema.LOOK_SLOTS }
-        function saveNew(): string { var i = root.saveFreeLook(); return i >= 0 ? "saved in " + (i + 1) : "all " + Schema.LOOK_SLOTS + " places are taken" }
+        function saveNew(): string { const i = root.saveFreeLook(); return i >= 0 ? "saved in " + (i + 1) : "all " + Schema.LOOK_SLOTS + " places are taken" }
         function load(slot: int): string { return root.loadLook(slot - 1) ? "loaded " + slot : "nothing saved there" }
         function exportLook(): string { return root.exportLook() }
         function importLook(json: string): string { return root.importLook(json) ? "ok" : "not a Baroque look" }

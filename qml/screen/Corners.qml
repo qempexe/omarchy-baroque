@@ -97,13 +97,13 @@ Item {
                             onCChanged: requestPaint()
                             onSChanged: requestPaint()
                             onPaint: {
-                                var ctx = getContext("2d")
+                                const ctx = getContext("2d")
                                 ctx.reset()
-                                var n = s
+                                const n = s
                                 // fill the square, then cut out a circle centered on the
                                 // square's inner corner: what's left is the rounded corner
-                                var ox = corner.modelData === "tl" || corner.modelData === "bl" ? n : 0
-                                var oy = corner.modelData === "tl" || corner.modelData === "tr" ? n : 0
+                                const ox = corner.modelData === "tl" || corner.modelData === "bl" ? n : 0
+                                const oy = corner.modelData === "tl" || corner.modelData === "tr" ? n : 0
                                 ctx.fillStyle = Qt.rgba(c.r, c.g, c.b, 1)
                                 ctx.fillRect(0, 0, n, n)
                                 ctx.globalCompositeOperation = "destination-out"

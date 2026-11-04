@@ -41,7 +41,7 @@ BarWidget {
         : "Baroque: " + (cfg.enabled ? shapeNames[cfg.shape] : "off")
           + "\nLeft click settings" + root.clickTip("right", cfg.rightClick) + root.clickTip("middle", cfg.middleClick)
     function clickTip(which, what) {
-        var name = { shape: "next shape", look: "next look", toggle: "on/off" }[what]
+        const name = { shape: "next shape", look: "next look", toggle: "on/off" }[what]
         return name ? " · " + which + " click " + name : ""
     }
 
@@ -58,7 +58,7 @@ BarWidget {
     // "open as" wins until someone uses pop out / dock in the header
     function chooseMode() {
         if (userPicked || !cfg) return
-        var want = cfg.openAs === "window"
+        const want = cfg.openAs === "window"
         if (want === popped) return
         if (windowShown) hideWindow()
         if (panelOpened) closePanel()
@@ -171,7 +171,7 @@ BarWidget {
         function onTabRequested(name, toggle) {
             if (!root.ux.host) root.ux.host = root
             if (root.ux.host !== root) return
-            var shown = root.panelOpened || root.windowShown
+            const shown = root.panelOpened || root.windowShown
             if (toggle && shown && root.ux.tabName === name) root.close()
             else root.showTab(name)
         }

@@ -28,7 +28,7 @@
 
 // a form leaning one way: "Top" or "Bottom" is the side of the end that is pulled in
 function leaning(base, side, dir, inner) {
-    var left = side === "L";
+    const left = side === "L";
     if (dir === "both") return base + (inner === "start" ? "Top" : "Bottom");   // narrow toward the windows
     if (dir === "left") return base + (left ? "Bottom" : "Top");
     return base + (left ? "Top" : "Bottom");                                      // right: leans like /
@@ -52,173 +52,173 @@ function sizes(T, L) {
 // bottom corner radius (0 where the shape touches the screen edge or is square)
 var forms = {
     round: function (T, L, rt, rb) {
-        var pts = [], links = [];
+        const pts = [], links = [];
         if (rb > 0) { pts.push([rb, T]); pts.push([0, T - rb]); links.push({ arc: [0, T], r: rb }); }
         else pts.push([0, T]);
         if (rt > 0) { links.push(null); pts.push([0, rt]); pts.push([rt, 0]); links.push({ arc: [0, 0], r: rt }); }
         else { links.push(null); pts.push([0, 0]); }
         return { pts: pts, links: links };
     },
-    roundBoth: function (T, L) { var k = sizes(T, L); return forms.round(T, L, k.big, k.big); },
+    roundBoth: function (T, L) { const k = sizes(T, L); return forms.round(T, L, k.big, k.big); },
     square: function (T) { return { pts: [[0, T], [0, 0]], links: [null] }; },
-    insetTop: function (T, L) { var k = sizes(T, L); return { pts: [[0, T], [k.s, 0]], links: [null] }; },
-    insetBottom: function (T, L) { var k = sizes(T, L); return { pts: [[k.s, T], [0, 0]], links: [null] }; },
-    point: function (T, L) { var k = sizes(T, L); return { pts: [[k.s, T], [0, k.m], [k.s, 0]], links: [null, null] }; },
-    notch: function (T, L) { var k = sizes(T, L); return { pts: [[0, T], [k.s, k.m], [0, 0]], links: [null, null] }; },
+    insetTop: function (T, L) { const k = sizes(T, L); return { pts: [[0, T], [k.s, 0]], links: [null] }; },
+    insetBottom: function (T, L) { const k = sizes(T, L); return { pts: [[k.s, T], [0, 0]], links: [null] }; },
+    point: function (T, L) { const k = sizes(T, L); return { pts: [[k.s, T], [0, k.m], [k.s, 0]], links: [null, null] }; },
+    notch: function (T, L) { const k = sizes(T, L); return { pts: [[0, T], [k.s, k.m], [0, 0]], links: [null, null] }; },
     chamfer: function (T, L) {
-        var c = sizes(T, L).c;
+        const c = sizes(T, L).c;
         return { pts: [[c, T], [0, T - c], [0, c], [c, 0]], links: [null, null, null] };
     },
     bite: function (T) { return { pts: [[0, T], [0, 0]], links: [{ q: [T * 0.45, T / 2] }] }; },
     stepTop: function (T, L) {
-        var k = sizes(T, L);
+        const k = sizes(T, L);
         return { pts: [[0, T], [0, k.m], [k.s * 0.6, k.m], [k.s * 0.6, 0]], links: [null, null, null] };
     },
     stepBottom: function (T, L) {
-        var k = sizes(T, L);
+        const k = sizes(T, L);
         return { pts: [[k.s * 0.6, T], [k.s * 0.6, k.m], [0, k.m], [0, 0]], links: [null, null, null] };
     },
     roundTop: function (T, L) {
-        var big = sizes(T, L).big;
+        const big = sizes(T, L).big;
         return { pts: [[0, T], [0, big], [big, 0]], links: [null, { arc: [0, 0], r: big }] };
     },
     roundBottom: function (T, L) {
-        var big = sizes(T, L).big;
+        const big = sizes(T, L).big;
         return { pts: [[big, T], [0, T - big], [0, 0]], links: [{ arc: [0, T], r: big }, null] };
     },
     zigzag: function (T, L) {
-        var z = Math.min(T * 0.3, L / 6), m = T / 2;
+        const z = Math.min(T * 0.3, L / 6), m = T / 2;
         return { pts: [[0, T], [z, T * 0.75], [0, m], [z, T * 0.25], [0, 0]], links: [null, null, null, null] };
     },
     scallop: function (T, L) {
-        var w = Math.min(T * 0.35, L / 6);
+        const w = Math.min(T * 0.35, L / 6);
         return { pts: [[0, T], [0, T / 2], [0, 0]], links: [{ q: [w, T * 0.75] }, { q: [w, T * 0.25] }] };
     },
     bulge: function (T, L) {
-        var bl = Math.min(T * 0.3, L / 6);
+        const bl = Math.min(T * 0.3, L / 6);
         return { pts: [[bl, T], [bl, 0]], links: [{ q: [-bl, T / 2] }] };
     },
     // a round knob sticking out of the middle, like a puzzle piece
     puzzle: function (T, L) {
-        var n = Math.min(T * 0.2, L / 8), kb = n * 1.7, m = T / 2;
+        const n = Math.min(T * 0.2, L / 8), kb = n * 1.7, m = T / 2;
         return { pts: [[kb, T], [kb, m + n * 0.55], [0, m], [kb, m - n * 0.55], [kb, 0]],
                  links: [null, { q: [kb * 0.05, m + n * 1.9] }, { q: [kb * 0.05, m - n * 1.9] }, null] };
     },
     // a curly brace, pointing out at the middle
     brace: function (T, L) {
-        var bb = Math.min(T * 0.42, L / 5), m = T / 2;
+        const bb = Math.min(T * 0.42, L / 5), m = T / 2;
         return { pts: [[bb, T], [bb * 0.4, m + bb * 0.55], [0, m], [bb * 0.4, m - bb * 0.55], [bb, 0]],
                  links: [{ q: [bb * 0.4, T] }, null, null, { q: [bb * 0.4, 0] }] };
     },
     // a soft S from the bottom to the top
     wave: function (T, L) {
-        var wv = Math.min(T * 0.7, L / 4), m = T / 2;
+        const wv = Math.min(T * 0.7, L / 4), m = T / 2;
         return { pts: [[0, T], [wv / 2, m], [wv, 0]], links: [{ q: [0, m] }, { q: [wv, m] }] };
     },
     // a square notch in the middle, like a battlement
     castle: function (T, L) {
-        var cn = Math.min(T * 0.28, L / 6), ch = T * 0.2, m = T / 2;
+        const cn = Math.min(T * 0.28, L / 6), ch = T * 0.2, m = T / 2;
         return { pts: [[0, T], [0, m + ch], [cn, m + ch], [cn, m - ch], [0, m - ch], [0, 0]],
                  links: [null, null, null, null, null] };
     },
     // an onion dome on its side: a round bulb that pulls in to a sharp tip
     dome: function (T, L) {
-        var od = Math.min(T * 0.85, L / 4), m = T / 2;
+        const od = Math.min(T * 0.85, L / 4), m = T / 2;
         return { pts: [[od, T], [od * 0.18, T * 0.64], [0, m], [od * 0.18, T * 0.36], [od, 0]],
                  links: [{ q: [-od * 0.3, T * 0.96] }, { q: [od * 0.32, T * 0.56] }, { q: [od * 0.32, T * 0.44] }, { q: [-od * 0.3, T * 0.04] }] };
     },
     corbelTop: function (T, L) {
-        var cbt = Math.min(T * 0.7, L / 4);
+        const cbt = Math.min(T * 0.7, L / 4);
         return { pts: [[0, T], [0, T * 0.58], [cbt * 0.45, T * 0.3], [cbt, 0]],
                  links: [null, { q: [0, T * 0.3] }, { q: [cbt * 0.45, 0] }] };
     },
     corbelBottom: function (T, L) {
-        var cbb = Math.min(T * 0.7, L / 4);
+        const cbb = Math.min(T * 0.7, L / 4);
         return { pts: [[cbb, T], [cbb * 0.45, T * 0.7], [0, T * 0.42], [0, 0]],
                  links: [{ q: [cbb * 0.45, T] }, { q: [0, T * 0.7] }, null] };
     },
     // corners scooped inward, like an old picture frame
     cartouche: function (T, L) {
-        var ck = Math.min(T * 0.32, L / 5);
+        const ck = Math.min(T * 0.32, L / 5);
         return { pts: [[ck, T], [0, T - ck], [0, ck], [ck, 0]], links: [{ q: [ck, T - ck] }, null, { q: [ck, ck] }] };
     },
     // a lily: a pointed middle petal between two small round ones
     fleur: function (T, L) {
-        var fb = Math.min(T * 0.55, L / 5), m = T / 2;
+        const fb = Math.min(T * 0.55, L / 5), m = T / 2;
         return { pts: [[fb, T], [fb, T * 0.68], [0, m], [fb, T * 0.32], [fb, 0]],
                  links: [{ q: [fb * 0.35, T * 0.98] }, { q: [fb * 0.2, T * 0.72] }, { q: [fb * 0.2, T * 0.28] }, { q: [fb * 0.35, T * 0.02] }] };
     },
     // a thin spike out of the middle
     needle: function (T, L) {
-        var nd = Math.min(T * 0.6, L / 5), nw = Math.max(1, T * 0.06), m = T / 2;
+        const nd = Math.min(T * 0.6, L / 5), nw = Math.max(1, T * 0.06), m = T / 2;
         return { pts: [[nd, T], [nd, m + nw * 2], [0, m], [nd, m - nw * 2], [nd, 0]], links: [null, null, null, null] };
     },
     // three soft bumps sticking out
     cloud: function (T, L) {
-        var cb = Math.min(T * 0.3, L / 8), m = T / 2;
+        const cb = Math.min(T * 0.3, L / 8), m = T / 2;
         return { pts: [[cb, T], [cb, T * 0.66], [cb, T * 0.34], [cb, 0]],
                  links: [{ q: [-cb * 0.9, T * 0.83] }, { q: [-cb * 1.3, m] }, { q: [-cb * 0.9, T * 0.17] }] };
     },
     ogive: function (T, L) {
-        var og = Math.min(T * 0.9, L / 4), m = T / 2;
+        const og = Math.min(T * 0.9, L / 4), m = T / 2;
         return { pts: [[og, T], [0, m], [og, 0]], links: [{ q: [og * 0.45, T] }, { q: [og * 0.45, 0] }] };
     },
     foldTop: function (T, L) {
-        var ft = Math.min(T * 0.45, L / 4);
+        const ft = Math.min(T * 0.45, L / 4);
         return { pts: [[0, T], [0, ft], [ft, 0]], links: [null, null] };
     },
     foldBottom: function (T, L) {
-        var fb = Math.min(T * 0.45, L / 4);
+        const fb = Math.min(T * 0.45, L / 4);
         return { pts: [[fb, T], [0, T - fb], [0, 0]], links: [null, null] };
     },
     // three square teeth
     teeth: function (T, L) {
-        var td = Math.min(T * 0.22, L / 8), tq = T / 5;
+        const td = Math.min(T * 0.22, L / 8), tq = T / 5;
         return { pts: [[0, T], [0, T - tq], [td, T - tq], [td, T - 2 * tq], [0, T - 2 * tq], [0, 2 * tq],
                        [td, 2 * tq], [td, tq], [0, tq], [0, 0]],
                  links: [null, null, null, null, null, null, null, null, null] };
     },
     // corners stepped in twice, like an engraved brass plate
     plaque: function (T, L) {
-        var c = Math.min(T * 0.32, L / 5), d = c / 2;
+        const c = Math.min(T * 0.32, L / 5), d = c / 2;
         return { pts: [[c, T], [c, T - d], [d, T - d], [d, T - c], [0, T - c], [0, c], [d, c], [d, d], [c, d], [c, 0]],
                  links: [null, null, null, null, null, null, null, null, null] };
     },
     // half an ellipse, longer than a round end
     oval: function (T, L) {
-        var o = Math.min(T * 0.9, L / 4);
+        const o = Math.min(T * 0.9, L / 4);
         return { pts: [[o, T], [0, T / 2], [o, 0]], links: [{ q: [0, T] }, { q: [0, 0] }] };
     },
     // a perforated edge, like a postage stamp
     stamp: function (T, L) {
-        var b = Math.min(T * 0.1, L / 10, 3), n = Math.max(3, Math.round(T / 6)), pts = [], links = [];
-        for (var i = 0; i <= n; i++) { pts.push([0, T - T * i / n]); if (i > 0) links.push({ q: [b * 2, T - T * (i - 0.5) / n] }); }
+        const b = Math.min(T * 0.1, L / 10, 3), n = Math.max(3, Math.round(T / 6)), pts = [], links = [];
+        for (let i = 0; i <= n; i++) { pts.push([0, T - T * i / n]); if (i > 0) links.push({ q: [b * 2, T - T * (i - 0.5) / n] }); }
         return { pts: pts, links: links };
     },
     swoopTop: function (T, L) {
-        var sw = Math.min(T * 1.1, L / 3);
+        const sw = Math.min(T * 1.1, L / 3);
         return { pts: [[0, T], [sw, 0]], links: [{ q: [0, 0] }] };
     },
     swoopBottom: function (T, L) {
-        var sb = Math.min(T * 1.1, L / 3);
+        const sb = Math.min(T * 1.1, L / 3);
         return { pts: [[sb, T], [0, 0]], links: [{ q: [0, T] }] };
     }
 };
 
 // the folded-over corners of "folded" ends: a darker triangle with a light crease
 function flaps(g) {
-    var ctx = g.ctx, x0 = g.x0, y0 = g.y0, L = g.L, T = g.T, p = g.p;
-    var dark = p.dark || "rgba(0,0,0,0.3)", light = p.light || "rgba(255,255,255,0.2)";
-    var f = Math.min(T * 0.45, L / 4);
-    var x1 = x0 + L, y1 = y0 + T;
-    var formsNow = [byKey.folded.form("L", g.dir, g.inner), byKey.folded.form("R", g.dir, g.inner)];
-    for (var i = 0; i < 2; i++) {
-        var form = formsNow[i];
+    const ctx = g.ctx, x0 = g.x0, y0 = g.y0, L = g.L, T = g.T, p = g.p;
+    const dark = p.dark || "rgba(0,0,0,0.3)", light = p.light || "rgba(255,255,255,0.2)";
+    const f = Math.min(T * 0.45, L / 4);
+    const x1 = x0 + L, y1 = y0 + T;
+    const formsNow = [byKey.folded.form("L", g.dir, g.inner), byKey.folded.form("R", g.dir, g.inner)];
+    for (let i = 0; i < 2; i++) {
+        const form = formsNow[i];
         if (form !== "foldTop" && form !== "foldBottom") continue;
-        var left = i === 0;
-        var cx = left ? x0 : x1, sx = left ? 1 : -1;
-        var top = form === "foldTop";
-        var cy = top ? y0 : y1, sy = top ? 1 : -1;
+        const left = i === 0;
+        const cx = left ? x0 : x1, sx = left ? 1 : -1;
+        const top = form === "foldTop";
+        const cy = top ? y0 : y1, sy = top ? 1 : -1;
         // the flap: the corner turned inward
         ctx.beginPath();
         ctx.moveTo(cx, cy + sy * f);
@@ -236,7 +236,7 @@ function flaps(g) {
     }
 }
 
-function fixed(name) { return function () { return name; }; }
+function fixed(name) { return () => name; }
 
 var list = [
     { key: "rounded", label: "Rounded", about: "Rounded ends follow the Roundness setting.", form: fixed("round"), ears: true },
@@ -298,4 +298,4 @@ var list = [
 ];
 
 var byKey = {};
-for (var i = 0; i < list.length; i++) byKey[list[i].key] = list[i];
+for (let i = 0; i < list.length; i++) byKey[list[i].key] = list[i];

@@ -70,42 +70,42 @@ function num(v, fallback) {
 //   side: "L" or "R",  dir: "right" | "left" | "both",  inner: "start" | "end"
 // The ends themselves live in parts/Ends.js
 function endForm(kind, side, dir, inner) {
-    var e = Ends.byKey[kind] || Ends.byKey.rounded;
+    const e = Ends.byKey[kind] || Ends.byKey.rounded;
     return e.form(side, dir, inner);
 }
 
 // the points of one end form (left end, bottom to top). rt / rb: top and bottom radius
 function endPoints(form, T, L, rt, rb) {
-    var f = Ends.forms[form] || Ends.forms.round;
+    const f = Ends.forms[form] || Ends.forms.round;
     return f(T, L, rt, rb);
 }
 
 // the outline of the shape, as a path on ctx
 function outline(ctx, x0, y0, L, T, r, ends, edge, flat, dir, inner) {
-    var x1 = x0 + L;
+    const x1 = x0 + L;
     r = Math.max(0, Math.min(r, T / 2, L / 2));
-    var rt = edge === "start" || flat === "start" ? 0 : r;      // corners on the top (y0) side
-    var rb = edge === "end" || flat === "end" ? 0 : r;          // corners on the bottom side
-    var d = dir === "left" || dir === "both" ? dir : "right";
-    var a = endPoints(endForm(ends, "L", d, inner), T, L, rt, rb);
-    var b = endPoints(endForm(ends, "R", d, inner), T, L, rt, rb);
+    const rt = edge === "start" || flat === "start" ? 0 : r;      // corners on the top (y0) side
+    const rb = edge === "end" || flat === "end" ? 0 : r;          // corners on the bottom side
+    const d = dir === "left" || dir === "both" ? dir : "right";
+    const a = endPoints(endForm(ends, "L", d, inner), T, L, rt, rb);
+    const b = endPoints(endForm(ends, "R", d, inner), T, L, rt, rb);
 
     ctx.beginPath();
     // left end, bottom to top
     function px(u) { return x0 + u; }
     ctx.moveTo(px(a.pts[0][0]), y0 + a.pts[0][1]);
-    for (var i = 1; i < a.pts.length; i++) link(ctx, a.links[i - 1], px, y0, a.pts[i]);
+    for (let i = 1; i < a.pts.length; i++) link(ctx, a.links[i - 1], px, y0, a.pts[i]);
     // right end, top to bottom: its list reversed and mirrored
     function qx(u) { return x1 - u; }
-    var n = b.pts.length;
+    const n = b.pts.length;
     ctx.lineTo(qx(b.pts[n - 1][0]), y0 + b.pts[n - 1][1]);
-    for (var j = n - 2; j >= 0; j--) link(ctx, b.links[j], qx, y0, b.pts[j]);
+    for (let j = n - 2; j >= 0; j--) link(ctx, b.links[j], qx, y0, b.pts[j]);
     ctx.closePath();
 }
 
 // one connector of an end: a line, a round corner or a curve, to point p
 function link(ctx, how, mapX, y0, p) {
-    var x = mapX(p[0]), y = y0 + p[1];
+    const x = mapX(p[0]), y = y0 + p[1];
     if (how && how.arc) ctx.arcTo(mapX(how.arc[0]), y0 + how.arc[1], x, y, how.r);
     else if (how && how.q) ctx.quadraticCurveTo(mapX(how.q[0]), y0 + how.q[1], x, y);
     else ctx.lineTo(x, y);
@@ -114,9 +114,9 @@ function link(ctx, how, mapX, y0, p) {
 // the curved ears that make an attached shape flow into the screen edge
 function ears(ctx, x0, y0, L, T, size, edge, color) {
     if (!edge || size <= 0) return;
-    var x1 = x0 + L;
-    var y = edge === "start" ? y0 : y0 + T;
-    var dir = edge === "start" ? 1 : -1;
+    const x1 = x0 + L;
+    const y = edge === "start" ? y0 : y0 + T;
+    const dir = edge === "start" ? 1 : -1;
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(x0, y);
@@ -135,7 +135,7 @@ function ears(ctx, x0, y0, L, T, size, edge, color) {
 // a number between 0 and 1 that is always the same for the same k and seed, so a
 // pattern never jumps around when the shape is drawn again
 function hash(k, seed) {
-    var v = Math.sin(k * 12.9898 + seed * 78.233) * 43758.5453;
+    const v = Math.sin(k * 12.9898 + seed * 78.233) * 43758.5453;
     return v - Math.floor(v);
 }
 
@@ -148,10 +148,10 @@ function volute(ctx, cx, cy, rmax, side, color) {
     ctx.lineWidth = Math.max(0.9, rmax / 6);
     ctx.globalAlpha = 0.85;
     ctx.beginPath();
-    var turns = 2.25 * Math.PI * 2, steps = 48;
-    for (var i = 0; i <= steps; i++) {
-        var t = i / steps, a = t * turns, rr = rmax * (1 - t * 0.85);
-        var px = cx + side * Math.cos(a) * rr, py = cy + Math.sin(a) * rr;
+    const turns = 2.25 * Math.PI * 2, steps = 48;
+    for (let i = 0; i <= steps; i++) {
+        const t = i / steps, a = t * turns, rr = rmax * (1 - t * 0.85);
+        const px = cx + side * Math.cos(a) * rr, py = cy + Math.sin(a) * rr;
         if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     }
     ctx.stroke();
@@ -161,12 +161,12 @@ function volute(ctx, cx, cy, rmax, side, color) {
 
 // a gradient over the shape's box at an angle in degrees (0 runs left to right)
 function angled(ctx, x0, y0, L, T, angle, colors) {
-    var a = num(angle, 0) * Math.PI / 180;
-    var dx = Math.cos(a), dy = Math.sin(a);
-    var half = (Math.abs(dx) * L + Math.abs(dy) * T) / 2;
-    var cx = x0 + L / 2, cy = y0 + T / 2;
-    var g = ctx.createLinearGradient(cx - dx * half, cy - dy * half, cx + dx * half, cy + dy * half);
-    for (var i = 0; i < colors.length; i++) g.addColorStop(colors.length === 1 ? 0 : i / (colors.length - 1), colors[i]);
+    const a = num(angle, 0) * Math.PI / 180;
+    const dx = Math.cos(a), dy = Math.sin(a);
+    const half = (Math.abs(dx) * L + Math.abs(dy) * T) / 2;
+    const cx = x0 + L / 2, cy = y0 + T / 2;
+    const g = ctx.createLinearGradient(cx - dx * half, cy - dy * half, cx + dx * half, cy + dy * half);
+    for (let i = 0; i < colors.length; i++) g.addColorStop(colors.length === 1 ? 0 : i / (colors.length - 1), colors[i]);
     return g;
 }
 
@@ -175,22 +175,22 @@ function texture(ctx, kind, color, x0, y0, L, T) {
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
     ctx.lineWidth = 1;
-    var step = 6;
+    const step = 6;
     if (kind === "stripes") {
         ctx.beginPath();
-        for (var x = x0 - T; x < x0 + L; x += step) { ctx.moveTo(x, y0 + T); ctx.lineTo(x + T, y0); }
+        for (let x = x0 - T; x < x0 + L; x += step) { ctx.moveTo(x, y0 + T); ctx.lineTo(x + T, y0); }
         ctx.stroke();
     } else if (kind === "dots") {
-        for (var dx = x0 + 3; dx < x0 + L; dx += step)
-            for (var dy = y0 + 3; dy < y0 + T; dy += step) ctx.fillRect(dx, dy, 1, 1);
+        for (let dx = x0 + 3; dx < x0 + L; dx += step)
+            for (let dy = y0 + 3; dy < y0 + T; dy += step) ctx.fillRect(dx, dy, 1, 1);
     } else if (kind === "grid") {
-        for (var gx = x0 + step; gx < x0 + L; gx += step) ctx.fillRect(gx, y0, 1, T);
-        for (var gy = y0 + step; gy < y0 + T; gy += step) ctx.fillRect(x0, gy, L, 1);
+        for (let gx = x0 + step; gx < x0 + L; gx += step) ctx.fillRect(gx, y0, 1, T);
+        for (let gy = y0 + step; gy < y0 + T; gy += step) ctx.fillRect(x0, gy, L, 1);
     }
 }
 
 function paint(ctx, p) {
-    var W = num(p.width, 0), H = num(p.height, 0);
+    const W = num(p.width, 0), H = num(p.height, 0);
     // `keep` draws on top of what's there, at ox/oy (the little pictures in the panel)
     if (!p.keep) ctx.reset();
     if (W <= 0 || H <= 0) return;
@@ -201,35 +201,36 @@ function paint(ctx, p) {
 }
 
 function draw(ctx, p, W, H) {
-    var vertical = p.vertical === true;
+    const vertical = p.vertical === true;
     if (vertical) ctx.transform(0, 1, 1, 0, 0, 0);        // draw along y instead of x
-    var along = vertical ? H : W, thick = vertical ? W : H;
-    var m = num(p.margin, 0);
-    var x0 = m, L = along - 2 * m;
+    const along = vertical ? H : W, thick = vertical ? W : H;
+    const m = num(p.margin, 0);
+    const x0 = m, L = along - 2 * m;
     // across: the shape keeps the full canvas thickness on the edge side when attached
-    var y0 = p.edge === "start" ? 0 : m;
-    var T = thick - (p.edge === "start" ? 0 : m) - (p.edge === "end" ? 0 : m);
+    let y0 = p.edge === "start" ? 0 : m;
+    let T = thick - (p.edge === "start" ? 0 : m) - (p.edge === "end" ? 0 : m);
     if (L < 2 || T < 2) return;
 
-    var r = num(p.r, 0);
-    var ends = p.ends || "rounded";
-    var edge = p.edge === "start" || p.edge === "end" ? p.edge : "";
-    var surface = p.surface || "filled";
-    var lines = p.lines || "none";
-    var orn = p.ornament || "none";
-    var flat = p.flat === "start" || p.flat === "end" ? p.flat : "";
-    var dir = p.dir === "left" || p.dir === "both" ? p.dir : "right";
-    var inner = p.inner === "start" ? "start" : "end";
-    var x1 = x0 + L, y1 = y0 + T;
+    const r = num(p.r, 0);
+    const ends = p.ends || "rounded";
+    const edge = p.edge === "start" || p.edge === "end" ? p.edge : "";
+    const surface = p.surface || "filled";
+    const lines = p.lines || "none";
+    const orn = p.ornament || "none";
+    const flat = p.flat === "start" || p.flat === "end" ? p.flat : "";
+    const dir = p.dir === "left" || p.dir === "both" ? p.dir : "right";
+    const inner = p.inner === "start" ? "start" : "end";
+    const x1 = x0 + L;
+    let y1 = y0 + T;
 
-    var ink = p.mark || p.line || "";
-    var S = Surfaces.byKey[surface] || Surfaces.byKey.filled;
-    var Ln = Lines.byKey[lines] || Lines.byKey.none;
-    var O = Ornaments.byKey[orn] || Ornaments.byKey.none;
-    var E = Ends.byKey[ends] || Ends.byKey.rounded;
+    const ink = p.mark || p.line || "";
+    const S = Surfaces.byKey[surface] || Surfaces.byKey.filled;
+    const Ln = Lines.byKey[lines] || Lines.byKey.none;
+    const O = Ornaments.byKey[orn] || Ornaments.byKey.none;
+    const E = Ends.byKey[ends] || Ends.byKey.rounded;
 
     // everything a part needs to draw itself (see CONTRIBUTING.md)
-    var g = {
+    const g = {
         ctx: ctx, p: p, vertical: vertical,
         x0: x0, y0: y0, x1: x1, y1: y1, L: L, T: T, r: r,
         ends: ends, edge: edge, flat: flat, dir: dir, inner: inner,
@@ -244,8 +245,8 @@ function draw(ctx, p, W, H) {
         // about `step` apart: fn(x, y, tx, ty, nx, ny, i, n) with the way it runs and the
         // way inward (see Trace.js)
         trace: function (inset) {
-            var d = num(inset, 0);
-            return Trace.trace(function (c) {
+            const d = num(inset, 0);
+            return Trace.trace(c => {
                 outline(c, x0 + d, y0 + d, Math.max(1, L - 2 * d), Math.max(1, T - 2 * d), Math.max(0, r - d), ends, edge, flat, dir, inner);
             });
         },
@@ -260,19 +261,19 @@ function draw(ctx, p, W, H) {
     }
 
     // fill, with its shadow
-    var fills = S.noFill !== true;
+    const fills = S.noFill !== true;
     if (fills) {
         if (num(p.shadowBlur, 0) > 0 && p.shadow) {
             ctx.shadowBlur = p.shadowBlur;
             ctx.shadowColor = p.shadow;
             // shadow offsets ignore the flip, so move it on the real axis
-            var shift = num(p.shadowShift, 0);
+            const shift = num(p.shadowShift, 0);
             ctx.shadowOffsetX = vertical ? shift : 0;
             ctx.shadowOffsetY = vertical ? 0 : shift;
         }
-        var style = p.fill || "rgba(0,0,0,0)";
+        let style = p.fill || "rgba(0,0,0,0)";
         if (p.fill2) {
-            var grad = p.gradAcross ? ctx.createLinearGradient(x0, y0, x0, y1) : ctx.createLinearGradient(x0, y0, x1, y0);
+            const grad = p.gradAcross ? ctx.createLinearGradient(x0, y0, x0, y1) : ctx.createLinearGradient(x0, y0, x1, y0);
             grad.addColorStop(0, p.fill);
             grad.addColorStop(p.gradAcross ? 0.12 : 0.55, p.fill);
             grad.addColorStop(1, p.fill2);
@@ -301,20 +302,20 @@ function draw(ctx, p, W, H) {
         if (S.outside) S.outside(g);
 
         // texture, depth and accent caps all stay inside the shape
-        var inside = (p.pattern && p.patternColor) || (p.depth === "raised" || p.depth === "sunken") || (p.cap && p.capColor);
+        const inside = (p.pattern && p.patternColor) || (p.depth === "raised" || p.depth === "sunken") || (p.cap && p.capColor);
         if (inside) {
             ctx.save();
             outline(ctx, x0, y0, L, T, r, ends, edge, flat, dir, inner);
             ctx.clip();
             if (p.pattern && p.patternColor) texture(ctx, p.pattern, p.patternColor, x0, y0, L, T);
             if ((p.depth === "raised" || p.depth === "sunken") && p.light && p.dark) {
-                var top = p.depth === "raised" ? p.light : p.dark;
-                var bottom = p.depth === "raised" ? p.dark : p.light;
+                const top = p.depth === "raised" ? p.light : p.dark;
+                const bottom = p.depth === "raised" ? p.dark : p.light;
                 ctx.fillStyle = top; ctx.fillRect(x0, y0, L, 1.5);
                 ctx.fillStyle = bottom; ctx.fillRect(x0, y1 - 1.5, L, 1.5);
             }
             if (p.cap && p.capColor) {
-                var cw = Math.max(3, Math.min(6, L / 8));
+                const cw = Math.max(3, Math.min(6, L / 8));
                 ctx.fillStyle = p.capColor;
                 if (p.cap === "start" || p.cap === "both") ctx.fillRect(x0, y0, cw, T);
                 if (p.cap === "end" || p.cap === "both") ctx.fillRect(x1 - cw, y0, cw, T);
@@ -329,13 +330,13 @@ function draw(ctx, p, W, H) {
         outline(ctx, x0, y0, L, T, r, ends, edge, flat, dir, inner);
         ctx.clip();
         ctx.fillStyle = p.glassColor || "rgba(255,255,255,0.2)";
-        var gy = p.inner === "start" ? y1 - 2 : y0 + 1;
+        const gy = p.inner === "start" ? y1 - 2 : y0 + 1;
         ctx.fillRect(x0 + r * 0.5, gy, L - r, 1);
         ctx.restore();
     }
 
     // lines, in the line color (a gradient when it fades)
-    var lw = num(p.lineWidth, 0);
+    const lw = num(p.lineWidth, 0);
     g.lw = lw;
     g.lwN = Math.max(1, lw);
     g.lineStyle = p.lineGrad && p.lineGrad.length > 1 ? angled(ctx, x0, y0, L, T, p.lineAngle, p.lineGrad) : p.line;

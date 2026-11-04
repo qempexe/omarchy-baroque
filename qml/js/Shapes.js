@@ -43,7 +43,7 @@ function thicknessFor(barSize, cfg) {
 // Slants and points cut in by about half their depth at the widget's middle,
 // notches and waves a little more
 function endRoom(ends, w) {
-    var e = Ends.byKey[ends];
+    const e = Ends.byKey[ends];
     return e && e.room ? share(e.room, w) : 0;
 }
 
@@ -55,7 +55,7 @@ function share(spec, w) {
 
 // extra room inside islands and pills that some ends ask for
 function endPad(ends, w) {
-    var e = Ends.byKey[ends];
+    const e = Ends.byKey[ends];
     return e && e.pad ? share(e.pad, w) : 0;
 }
 
@@ -63,7 +63,7 @@ function endPad(ends, w) {
 // to clear them, whatever the ends are. A share of the shape's thickness
 var ORNAMENT_ROOM = { scrolls: 0.62, crown: 0.72, laurels: 0.55 };
 function curlRoom(cfg, w) {
-    var k = cfg ? ORNAMENT_ROOM[cfg.ornaments] : undefined;
+    const k = cfg ? ORNAMENT_ROOM[cfg.ornaments] : undefined;
     return typeof k === "number" ? share({ thick: k }, w) : 0;
 }
 
@@ -71,8 +71,8 @@ function curlRoom(cfg, w) {
 // neither its ends nor its outline ever touch what's inside
 function pillRoom(cfg, barSize) {
     if (!cfg || cfg.shape !== "widgets") return 0;
-    var slim = clamp(cfg.slim, 0, Math.floor(barSize / 2) - 2);
-    var w = Math.max(2, barSize - 2 * slim);
+    const slim = clamp(cfg.slim, 0, Math.floor(barSize / 2) - 2);
+    const w = Math.max(2, barSize - 2 * slim);
     return Math.round(clamp(cfg.pillRoom, 0, 12) + Math.max(endRoom(cfg.ends, w), curlRoom(cfg, w)));
 }
 
@@ -89,16 +89,16 @@ function pillSpacing(cfg, barSize) {
 // start; reach is how far a pill sticks out past its widget
 function fitSpacing(want, length, margin, groups, reach, minGap) {
     if (!(want > 0) || !(length > 0) || !groups) return 0;
-    function g(k) { var v = groups[k]; return v && v.n > 0 ? v : { sum: 0, n: 0 }; }
-    var L = g("left"), C = g("center"), R = g("right");
-    var best = want;
+    function g(k) { const v = groups[k]; return v && v.n > 0 ? v : { sum: 0, n: 0 }; }
+    const L = g("left"), C = g("center"), R = g("right");
+    let best = want;
     // a + b * sp <= c - d * sp
     function cap(a, b, c, d) {
         if (b + d <= 0) return a <= c ? want : -1;
         return Math.floor((c - a) / (b + d));
     }
     if (C.n > 0) {
-        var cHalf = C.sum / 2 + reach, cGaps = Math.max(0, C.n - 1) / 2;
+        const cHalf = C.sum / 2 + reach, cGaps = Math.max(0, C.n - 1) / 2;
         if (L.n > 0) best = Math.min(best, cap(margin + L.sum + reach + minGap, Math.max(0, L.n - 1), length / 2 - cHalf, cGaps));
         if (R.n > 0) best = Math.min(best, cap(margin + R.sum + reach + minGap, Math.max(0, R.n - 1), length / 2 - cHalf, cGaps));
     } else if (L.n > 0 && R.n > 0) {
@@ -115,14 +115,14 @@ function sectionMargin(cfg, normal, barSize) {
     // full width: the stock spacing unless you changed "Room at the ends", and a floating
     // full-width bar keeps as far from the screen's ends as from its edge
     if (cfg.shape === "full") return floatGapFor(cfg) + (cfg.fullInset === 8 || typeof cfg.fullInset !== "number" ? normal : clamp(cfg.fullInset, 0, 200));
-    var side = clamp(cfg.sideGap, 0, 200);
+    const side = clamp(cfg.sideGap, 0, 200);
     // widget pills reach past their first and last widget
     if (cfg.shape === "widgets") return side + pillRoom(cfg, barSize > 0 ? barSize : 26) + 2;
-    var extra = clamp(cfg.padding, 0, 40);
-    var thick = barSize > 0 ? barSize : 26;
+    let extra = clamp(cfg.padding, 0, 40);
+    const thick = barSize > 0 ? barSize : 26;
     extra += Math.max(endPad(cfg.ends, thick), curlRoom(cfg, thick));
     // pointed and slanted ends, and curls, need a little more room
-    var e = Ends.byKey[cfg.ends];
+    const e = Ends.byKey[cfg.ends];
     if ((e && e.extraMargin) || curlRoom(cfg, thick) > 0) extra += 6;
     return side + extra;
 }
@@ -138,9 +138,9 @@ function radiusFor(cfg, w) {
 // attached shapes reach all the way to the screen edge
 function across(view, cfg) {
     if (!floating(cfg)) return { c: 0, w: view.thickness };
-    var gap = (view.thickness - view.barSize) / 2;
-    var slim = clamp(cfg.slim, 0, Math.floor(view.barSize / 2) - 2);
-    var c = gap + slim, w = Math.max(2, view.barSize - 2 * slim);
+    const gap = (view.thickness - view.barSize) / 2;
+    const slim = clamp(cfg.slim, 0, Math.floor(view.barSize / 2) - 2);
+    let c = gap + slim, w = Math.max(2, view.barSize - 2 * slim);
     if (cfg.attach) {
         if (view.edgeAtStart) { w = c + w; c = 0; }
         else w = view.thickness - c;
@@ -150,13 +150,13 @@ function across(view, cfg) {
 
 // visible widgets only, in bar order
 function usable(slots) {
-    var out = [];
+    const out = [];
     if (!slots) return out;
-    for (var i = 0; i < slots.length; i++) {
-        var s = slots[i];
+    for (let i = 0; i < slots.length; i++) {
+        const s = slots[i];
         if (s && typeof s.a === "number" && isFinite(s.a) && typeof s.len === "number" && s.len >= 2) out.push(s);
     }
-    out.sort(function(x, y) { return x.a - y.a; });
+    out.sort((x, y) => x.a - y.a);
     return out;
 }
 
@@ -173,11 +173,11 @@ function wanted(cfg, region) {
 
 // the start and end of each region: { left: {a, b}, center: ..., right: ... }
 function regions(slots) {
-    var out = {};
-    for (var i = 0; i < slots.length; i++) {
-        var s = slots[i];
-        var key = regionOf(s);
-        var end = s.a + s.len;
+    const out = {};
+    for (let i = 0; i < slots.length; i++) {
+        const s = slots[i];
+        const key = regionOf(s);
+        const end = s.a + s.len;
         if (!out[key]) out[key] = { a: s.a, b: end };
         else { out[key].a = Math.min(out[key].a, s.a); out[key].b = Math.max(out[key].b, end); }
     }
@@ -186,10 +186,10 @@ function regions(slots) {
 
 // islands that touch or overlap become one (it keeps the first group's name)
 function mergeSpans(spans, minGap) {
-    spans.sort(function(x, y) { return x.a - y.a; });
-    var out = [];
-    for (var i = 0; i < spans.length; i++) {
-        var last = out.length > 0 ? out[out.length - 1] : null;
+    spans.sort((x, y) => x.a - y.a);
+    const out = [];
+    for (let i = 0; i < spans.length; i++) {
+        const last = out.length > 0 ? out[out.length - 1] : null;
         if (last && spans[i].a <= last.b + minGap) {
             last.b = Math.max(last.b, spans[i].b);
             if (spans[i].region === "center") last.region = "center";
@@ -199,33 +199,33 @@ function mergeSpans(spans, minGap) {
 }
 
 function layout(view, slotsIn, cfg) {
-    var result = { shapes: [], dividers: [], separators: [] };
+    const result = { shapes: [], dividers: [], separators: [] };
     if (!view || !cfg || !(view.length > 0) || !(view.thickness > 0)) return result;
 
-    var slots = usable(slotsIn);
-    var x = across(view, cfg);
-    var r = radiusFor(cfg, x.w);
-    var side = floating(cfg) ? clamp(cfg.sideGap, 0, view.length / 3) : 0;
-    var pad = clamp(cfg.padding, 0, 40) + Math.max(endPad(cfg.ends, x.w), curlRoom(cfg, x.w));
-    var lo = side, hi = view.length - side;
-    var count = 0;
+    const slots = usable(slotsIn);
+    const x = across(view, cfg);
+    const r = radiusFor(cfg, x.w);
+    const side = floating(cfg) ? clamp(cfg.sideGap, 0, view.length / 3) : 0;
+    const pad = clamp(cfg.padding, 0, 40) + Math.max(endPad(cfg.ends, x.w), curlRoom(cfg, x.w));
+    const lo = side, hi = view.length - side;
+    let count = 0;
 
     function add(a, b, role, region) {
         a = Math.max(lo, a);
         b = Math.min(hi, b);
         if (b - a < 2) return;
-        var base = role === "base";
+        const base = role === "base";
         result.shapes.push({
             a: a, len: b - a, c: base ? x.c : x.c, w: x.w, r: r, role: role,
             region: region, index: base ? count++ : -1, attached: !!cfg.attach && floating(cfg)
         });
     }
 
-    var reg = regions(slots);
+    const reg = regions(slots);
 
     if (cfg.shape === "full") {
         // floating off the edge, it keeps the same distance from the ends, with round corners
-        var fg = Math.min(floatGapFor(cfg), view.length / 4);
+        const fg = Math.min(floatGapFor(cfg), view.length / 4);
         result.shapes.push({ a: fg, len: view.length - 2 * fg, c: 0, w: view.thickness,
                              r: fg > 0 ? Math.min(clamp(cfg.radius, 0, 40), view.thickness / 2) : 0, role: "base",
                              region: "all", index: count++, attached: false });
@@ -234,38 +234,38 @@ function layout(view, slotsIn, cfg) {
             add(slots[0].a - pad, slots[slots.length - 1].a + slots[slots.length - 1].len + pad, "base", "all");
         else add(lo, hi, "base", "all");
     } else if (cfg.shape === "islands") {
-        var spans = [];
-        var keys = ["left", "center", "right"];
-        var box = {};
-        for (var k = 0; k < keys.length; k++) {
-            var g = reg[keys[k]];
+        const spans = [];
+        const keys = ["left", "center", "right"];
+        const box = {};
+        for (let k = 0; k < keys.length; k++) {
+            const g = reg[keys[k]];
             if (g) box[keys[k]] = { a: g.a - pad, b: g.b + pad, region: keys[k] };
         }
         // a wider center island, still centered on its widgets
-        var minC = clamp(cfg.centerMin, 0, view.length);
+        const minC = clamp(cfg.centerMin, 0, view.length);
         if (box.center && box.center.b - box.center.a < minC) {
-            var mid = (box.center.a + box.center.b) / 2;
+            const mid = (box.center.a + box.center.b) / 2;
             box.center.a = mid - minC / 2; box.center.b = mid + minC / 2;
         }
         // left and right just as wide: each grows toward the middle
         if (cfg.mirrorSides && box.left && box.right) {
-            var wide = Math.max(box.left.b - box.left.a, box.right.b - box.right.a);
+            const wide = Math.max(box.left.b - box.left.a, box.right.b - box.right.a);
             box.left.b = box.left.a + wide;
             box.right.a = box.right.b - wide;
         }
-        for (var k2 = 0; k2 < keys.length; k2++)
+        for (let k2 = 0; k2 < keys.length; k2++)
             if (box[keys[k2]] && wanted(cfg, keys[k2])) spans.push(box[keys[k2]]);
-        var merged = mergeSpans(spans, clamp(cfg.mergeGap, 0, 60));
-        for (var m = 0; m < merged.length; m++) add(merged[m].a, merged[m].b, "base", merged[m].region);
+        const merged = mergeSpans(spans, clamp(cfg.mergeGap, 0, 60));
+        for (let m = 0; m < merged.length; m++) add(merged[m].a, merged[m].b, "base", merged[m].region);
     } else {
         // the stock bar leaves pillSpacing between widgets, so each pill can reach
         // pillRoom past its widget; when it doesn't (yet), pills shrink to keep the gap
-        var room = pillRoom(cfg, view.barSize);
-        var gap = clamp(cfg.pillGap, 0, 12);
-        for (var i = 0; i < slots.length; i++) {
-            var rg = regionOf(slots[i]);
+        const room = pillRoom(cfg, view.barSize);
+        const gap = clamp(cfg.pillGap, 0, 12);
+        for (let i = 0; i < slots.length; i++) {
+            const rg = regionOf(slots[i]);
             if (!wanted(cfg, rg)) continue;
-            var a0 = slots[i].a - room, b0 = slots[i].a + slots[i].len + room;
+            let a0 = slots[i].a - room, b0 = slots[i].a + slots[i].len + room;
             if (i > 0) a0 = Math.max(a0, (slots[i - 1].a + slots[i - 1].len + slots[i].a + gap) / 2);
             if (i + 1 < slots.length) b0 = Math.min(b0, (slots[i].a + slots[i].len + slots[i + 1].a - gap) / 2);
             add(a0, b0, "base", rg);
@@ -274,12 +274,12 @@ function layout(view, slotsIn, cfg) {
 
     // hover and open panel marks sit on the widget itself
     // on widget pills they cover the whole pill
-    var reach = cfg.shape === "widgets" ? pillRoom(cfg, view.barSize) : -2;
-    for (var j = 0; j < slots.length; j++) {
-        var s = slots[j];
-        var ma = s.a - reach, mb = s.a + s.len + reach;
+    const reach = cfg.shape === "widgets" ? pillRoom(cfg, view.barSize) : -2;
+    for (let j = 0; j < slots.length; j++) {
+        const s = slots[j];
+        let ma = s.a - reach, mb = s.a + s.len + reach;
         if (cfg.shape === "widgets") {
-            var g2 = clamp(cfg.pillGap, 0, 12);
+            const g2 = clamp(cfg.pillGap, 0, 12);
             if (j > 0) ma = Math.max(ma, (slots[j - 1].a + slots[j - 1].len + s.a + g2) / 2);
             if (j + 1 < slots.length) mb = Math.min(mb, (s.a + s.len + slots[j + 1].a - g2) / 2);
         }
@@ -288,25 +288,25 @@ function layout(view, slotsIn, cfg) {
     }
 
     // dividers between the groups, on one long shape only
-    var oneLong = cfg.shape === "full" || (cfg.shape === "pill" && !cfg.pillFit);
+    const oneLong = cfg.shape === "full" || (cfg.shape === "pill" && !cfg.pillFit);
     if (cfg.dividers && oneLong) {
-        var order = [];
+        const order = [];
         if (reg.left) order.push(reg.left);
         if (reg.center) order.push(reg.center);
         if (reg.right) order.push(reg.right);
-        for (var d = 1; d < order.length; d++) {
-            var gapStart = order[d - 1].b, gapEnd = order[d].a;
+        for (let d = 1; d < order.length; d++) {
+            const gapStart = order[d - 1].b, gapEnd = order[d].a;
             if (gapEnd - gapStart < 16) continue;
-            var dl = Math.round(x.w * 0.5);
+            const dl = Math.round(x.w * 0.5);
             result.dividers.push({ a: Math.round((gapStart + gapEnd) / 2), c: x.c + (x.w - dl) / 2, w: dl });
         }
     }
 
     // separators between two widgets of the same group (not between pills, they have gaps)
     if (cfg.separators && cfg.separators !== "none" && cfg.shape !== "widgets") {
-        var sl = Math.round(x.w * 0.4);
-        for (var q = 1; q < slots.length; q++) {
-            var prev = slots[q - 1], cur = slots[q];
+        const sl = Math.round(x.w * 0.4);
+        for (let q = 1; q < slots.length; q++) {
+            const prev = slots[q - 1], cur = slots[q];
             if (regionOf(prev) !== regionOf(cur)) continue;
             if (cur.a - (prev.a + prev.len) > 6) continue;     // not neighbours
             result.separators.push({ a: Math.round(cur.a), c: x.c + (x.w - sl) / 2, w: sl });

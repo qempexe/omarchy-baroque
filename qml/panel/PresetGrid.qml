@@ -19,14 +19,14 @@ ColumnLayout {
     // is this look what the bar shows right now?
     function current(p) {
         if (!root.svc) return false
-        var c = root.svc.cfg
-        for (var k in p.set) if (c[k] !== p.set[k]) return false
+        const c = root.svc.cfg
+        for (const k in p.set) if (c[k] !== p.set[k]) return false
         return true
     }
 
     // a see-through surface (Faint) shows faintly in the little pictures too
     function faintFill(key) {
-        var e = Surfaces.byKey[key]
+        const e = Surfaces.byKey[key]
         return e !== undefined && typeof e.fill === "number" && e.fill < 0.2 && e.noFill !== true
     }
 
@@ -84,7 +84,7 @@ ColumnLayout {
                     onAcChanged: requestPaint()
                     Component.onCompleted: requestPaint()
                     onPaint: {
-                        var ctx = getContext("2d")
+                        const ctx = getContext("2d")
                         ctx.reset()
                         // the desktop and a window under the bar
                         ctx.fillStyle = Qt.rgba(fg.r, fg.g, fg.b, 0.05)
@@ -92,24 +92,24 @@ ColumnLayout {
                         ctx.fillStyle = Qt.rgba(fg.r, fg.g, fg.b, 0.07)
                         ctx.fillRect(6, 15, width - 12, height - 17)
 
-                        var shape = look.shape || "islands"
-                        var spans = shape === "full" ? [[0, 76]] : shape === "pill" ? [[4, 68]]
+                        const shape = look.shape || "islands"
+                        const spans = shape === "full" ? [[0, 76]] : shape === "pill" ? [[4, 68]]
                                   : shape === "islands" ? [[4, 18], [29, 18], [54, 18]]
                                   : [[4, 9], [15, 9], [30, 16], [51, 9], [62, 10]]
-                        var surface = look.surface || "filled"
-                        var attached = look.attach === true && shape !== "full"
-                        var th = shape === "full" ? 10 : 8
-                        var top = shape === "full" || attached ? 0 : 3
-                        var h = attached ? 11 : th
-                        var mono = look.colorMode === "monochrome"
-                        var base = mono ? Qt.rgba(0.15, 0.15, 0.15, 1) : bg
-                        var mark = mono ? fg : ac
-                        var palette = root.svc && root.svc.themePalette ? root.svc.themePalette : []
-                        for (var i = 0; i < spans.length; i++) {
-                            var mine = look.colorMode === "palette" && palette.length > 0 ? Qt.color(palette[i % palette.length]) : mark
-                            var lines = look.lines || "none"
+                        const surface = look.surface || "filled"
+                        const attached = look.attach === true && shape !== "full"
+                        const th = shape === "full" ? 10 : 8
+                        const top = shape === "full" || attached ? 0 : 3
+                        const h = attached ? 11 : th
+                        const mono = look.colorMode === "monochrome"
+                        const base = mono ? Qt.rgba(0.15, 0.15, 0.15, 1) : bg
+                        const mark = mono ? fg : ac
+                        const palette = root.svc && root.svc.themePalette ? root.svc.themePalette : []
+                        for (let i = 0; i < spans.length; i++) {
+                            const mine = look.colorMode === "palette" && palette.length > 0 ? Qt.color(palette[i % palette.length]) : mark
+                            const lines = look.lines || "none"
                             // subtle lines are too faint to see this small, so they show as none
-                            var lw = lines !== "none" && (lines !== "solid" || look.border !== "subtle") ? 1 : 0
+                            const lw = lines !== "none" && (lines !== "solid" || look.border !== "subtle") ? 1 : 0
                             Paint.paint(ctx, {
                                 keep: true, ox: spans[i][0] - 2, oy: top - (attached ? 0 : 2),
                                 width: spans[i][1] + 4, height: h + (attached ? 2 : 4), margin: 2,
