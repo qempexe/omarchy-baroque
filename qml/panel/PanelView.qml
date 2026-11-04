@@ -99,27 +99,21 @@ Item {
                 anchors.margins: ui.px(12)
                 spacing: ui.px(10)
 
-                Rectangle {   // badge: a tiny bar of three islands
+                Rectangle {   // badge: the logo
                     Layout.alignment: Qt.AlignVCenter
                     implicitWidth: ui.px(30); implicitHeight: ui.px(30)
                     radius: ui.r(1.5)
                     color: ui.accentTint(0.18)
                     border.width: 1
                     border.color: ui.tint(0.08)
-                    Row {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: ui.px(8)
-                        spacing: 2
-                        Repeater {
-                            model: [5, 7, 5]
-                            Rectangle { width: modelData; height: 4; radius: 2; color: index === 1 ? ui.accent : ui.tint(0.55) }
-                        }
-                    }
-                    Rectangle {   // the line under the dots
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: ui.px(19)
-                        width: parent.width - ui.px(12); height: 1.5; radius: 1
-                        color: ui.tint(0.3)
+                    Image {   // the light logo on a dark panel, the dark one on a light panel
+                        anchors.centerIn: parent
+                        width: ui.px(24); height: width
+                        source: Qt.resolvedUrl(ui.lightSurface ? "../../assets/logo-dark.png" : "../../assets/logo.png")
+                        sourceSize.width: 96
+                        sourceSize.height: 96
+                        smooth: true
+                        mipmap: true
                     }
                 }
 
