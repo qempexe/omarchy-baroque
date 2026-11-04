@@ -117,8 +117,10 @@ Item {
     // Omarchy 4.5 and later: the item between the window's root and the widgets that is a
     // thin strip along the window's edge, the window being as big as the screen
     function findStrip(found) {
-        if (!deco.content || found.sections.length === 0) return null
-        let it = found.sections[0], cand = null, guard = 0
+        // from any widget: a bar may have widgets in the center only
+        const start = found.sections[0] || found.lists[0] || found.slots[0]
+        if (!deco.content || !start) return null
+        let it = start, cand = null, guard = 0
         while (it && it.parent && it.parent !== deco.content && guard++ < 20) it = it.parent
         if (!it || it.parent !== deco.content) return null
         cand = it
@@ -129,6 +131,16 @@ Item {
         if (thin <= 0 || thin > whole * 0.5 || whole - thin < 8) return null
         return cand
     }
+    // a bar window far thicker than any bar: the whole screen, as from Omarchy 4.5. Without
+    // its strip found, Baroque must not size or color such a window, or it covers the desktop
+    function spansScreen() {
+        const w = deco.win
+        let across = 0
+        try { across = deco.vertical ? w.width : w.height } catch (e) { across = 0 }
+        if (!(across > 0) && deco.content) across = deco.vertical ? deco.content.width : deco.content.height
+        return across > 200
+    }
+
     function findStripBg(st) {
         const kids = st ? st.children : []
         for (let i = 0; i < kids.length; i++) {
@@ -293,6 +305,7 @@ Item {
             try { deco.host.anchors.topMargin = 0; deco.host.anchors.bottomMargin = 0; deco.host.anchors.leftMargin = 0; deco.host.anchors.rightMargin = 0 } catch (e5) { }
             deco.host = null
         }
+        if (spansScreen()) return
         if (deco.svc && typeof deco.svc.giveBackWindow === "function") {
             if (deco.win) deco.svc.giveBackWindow(deco.win, clear)
             for (let i = 0; i < found.sections.length; i++) deco.svc.giveBackMargins(found.sections[i].anchors)
@@ -450,6 +463,8 @@ Item {
         if (!deco.content && !findWindow()) { setState("lost"); return }
         const found = cached()
         if (!deco.strip && found.slots.length > 0) deco.strip = findStrip(found)
+        // a full-screen bar window whose strip can't be found: leave it alone
+        if (!deco.strip && spansScreen()) { deco.cache = null; restore(); setState("lost"); return }
         // nothing that looks like the stock bar: leave it alone
         if (found.slots.length === 0) { deco.cache = null; restore(); setState("lost"); return }
 
