@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 40 432 432" width="424" height="424">
+  <title>Baroque</title>
+  <defs>
+    <mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="#fff"/>
+      <rect x="150" y="196" width="62" height="36" rx="18" fill="#000"/>
+      <rect x="222" y="190" width="68" height="48" rx="24" fill="#000"/>
+      <rect x="300" y="196" width="62" height="36" rx="18" fill="#000"/>
+      <g fill="none" stroke="#000" stroke-width="13" stroke-linecap="round">
+        <path d="M178 290 H334"/>
+        <path d="M178 290 C150 290 140 316 158 326 C172 334 186 320 176 310"/>
+        <path d="M334 290 C362 290 372 316 354 326 C340 334 326 320 336 310"/>
+      </g>
+    </mask>
+  </defs>
+  <g fill="none" stroke="#EADBC8" stroke-width="14" stroke-linecap="round">
+    <path d="M447.7,325.8 A204,204 0 0 1 64.3,325.8"/>
+    <path d="M64.3,186.2 A204,204 0 0 1 447.7,186.2"/>
+  </g>
+  <circle cx="256" cy="256" r="172" fill="#EADBC8" mask="url(#cut)"/>
+</svg>
