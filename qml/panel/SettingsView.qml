@@ -80,7 +80,7 @@ Item {
             const items = Schema.groups[g].items
             for (let i = 0; i < items.length; i++) {
                 const it = items[i]
-                if (root.changedOnly && (it.kind === "presets" || it.kind === "looks" || root.same(it))) continue
+                if (root.changedOnly && (it.kind === "presets" || it.kind === "looks" || it.kind === "about" || root.same(it))) continue
                 if (!root.matches(it, Schema.groups[g].title, q)) continue
                 const heading = root.filtering ? Schema.groups[g].title + (it.section ? "  ›  " + it.section : "") : (it.section || "")
                 out.push({ item: it, heading: heading !== last ? heading : "" })
@@ -100,7 +100,7 @@ Item {
         for (let g = 0; g < Schema.groups.length; g++) {
             const items = Schema.groups[g].items
             for (let i = 0; i < items.length; i++)
-                if (items[i].kind !== "presets" && items[i].kind !== "looks" && !same(items[i])) n++
+                if (items[i].kind !== "presets" && items[i].kind !== "looks" && items[i].kind !== "about" && !same(items[i])) n++
         }
         return n
     }
@@ -295,6 +295,12 @@ Item {
                                 label: rowBox.row.label
                                 hint: rowBox.row.hint || ""
                             }
+                            AboutPage {
+                                visible: rowBox.row.kind === "about"
+                                Layout.fillWidth: true
+                                ui: root.ui
+                                svc: root.svc
+                            }
                             LookSlots {
                                 visible: rowBox.row.kind === "looks"
                                 Layout.fillWidth: true
@@ -305,7 +311,7 @@ Item {
                                 hint: rowBox.row.hint || ""
                             }
                             SettingRow {
-                                visible: rowBox.row.kind !== "presets" && rowBox.row.kind !== "looks"
+                                visible: rowBox.row.kind !== "presets" && rowBox.row.kind !== "looks" && rowBox.row.kind !== "about"
                                 Layout.fillWidth: true
                                 Layout.topMargin: ui.px(14)
                                 Layout.bottomMargin: ui.px(14)

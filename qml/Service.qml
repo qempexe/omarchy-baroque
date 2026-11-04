@@ -19,6 +19,8 @@ Item {
     property var manifest: null
 
     readonly property string pluginId: "io.github.qempexe.baroque"
+    // shown on the About tab: the manifest's version, which the shell hands over
+    readonly property string version: manifest && manifest.version ? String(manifest.version) : "1.0.1"
 
     // settings
     SettingsStore { id: settingsStore }

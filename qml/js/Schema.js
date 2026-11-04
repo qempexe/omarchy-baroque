@@ -387,6 +387,12 @@ var groups = [
       { key: "opacity", section: "Look", label: "Panel opacity", kind: "int", fallback: 96, min: 50, max: 100, step: 2,
         hint: "Background of this panel." }
     ]
+  },
+  {
+    title: "About",
+    items: [
+      { key: "about", label: "About", kind: "about", hint: "The version, and more plugins." }
+    ]
   }
 ];
 
@@ -455,7 +461,7 @@ for (let g = 0; g < groups.length; g++) {
     for (let i = 0; i < items.length; i++) {
         const item = items[i];
         itemByKey[item.key] = item;
-        if (item.kind === "presets") continue;          // buttons, nothing saved
+        if (item.kind === "presets" || item.kind === "about") continue;   // buttons and pages, nothing saved
         if (item.kind === "palette") {
             for (let t = 0; t < item.targets.length; t++) {
                 const colorKey = item.targets[t].key;
