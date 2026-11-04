@@ -12,12 +12,14 @@ Item {
 
     readonly property string version: svc && svc.version ? String(svc.version) : ""
     readonly property string moreUrl: "https://github.com/qempexe?tab=repositories&q=omarchy"
+    // the height to center in: the whole tab when About is the only thing on show
+    property real fill: 0
 
-    implicitHeight: block.implicitHeight
+    implicitHeight: Math.max(block.implicitHeight, fill)
 
     ColumnLayout {
         id: block
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.centerIn: parent
         spacing: ui.px(6)
 
         Image {

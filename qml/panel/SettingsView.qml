@@ -300,6 +300,7 @@ Item {
                                 Layout.fillWidth: true
                                 ui: root.ui
                                 svc: root.svc
+                                fill: root.rows.length === 1 ? flick.height - ui.px(22) : 0
                             }
                             LookSlots {
                                 visible: rowBox.row.kind === "looks"
