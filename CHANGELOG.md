@@ -4,6 +4,15 @@ All notable changes to Baroque. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] - 2026-11-04
+
+### Fixed
+
+- On Omarchy 4.5 release candidates, Baroque said it couldn't find the bar layout. It
+  now reads the newer widget lists, and finds the bar strip starting from its own button.
+- When it still can't read a bar, it writes what it found to the log, so the layout can be
+  added.
+
 ## [1.1.1] - 2026-11-04
 
 ### Fixed
