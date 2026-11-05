@@ -79,9 +79,6 @@ Item {
     function locate() {
         const item = root.anchorItem
         if (!item) return
-        const scr = item.screen
-        const sw = scr ? scr.width : 1920
-        const sh = scr ? scr.height : 1080
         let side = ""
         let qsWin = null
         let win = null
@@ -89,6 +86,10 @@ Item {
         // 1. ask the bar window which edge it's on
         try { qsWin = item.QsWindow.window } catch (e0) { qsWin = null }
         try { win = qsWin ? qsWin : item.Window.window } catch (e1) { win = null }
+        let scr = null
+        try { scr = win && win.screen ? win.screen : null } catch (e4) { scr = null }
+        const sw = scr && scr.width > 0 ? scr.width : 1920
+        const sh = scr && scr.height > 0 ? scr.height : 1080
         try {
             const an = win ? win.anchors : null
             if (an) {
@@ -167,6 +168,12 @@ Item {
             root.extra = 6                    // only the widget is known: allow a little for bar padding
         }
 
+        // Set the anchor here rather than with bindings: Quickshell unsets the anchor's
+        // item whenever its window is written, and the other way round, so two bindings
+        // can undo each other and leave the panel with nothing to hang off.
+        if (root.useRect) popup.anchor.window = qsWin
+        else popup.anchor.item = item
+
         // max height that still fits under/over the bar
         const thick = (!root.vertical && wh > 0 && wh < sh * 0.5) ? wh : 40
         const room = root.vertical ? sh - 40 : sh - thick - root.gap - root.extra - 16
@@ -203,8 +210,6 @@ Item {
         implicitWidth: (root.ui ? root.ui.cfgSafe.windowWidth : 520) + root.padLeft + root.padRight
         implicitHeight: Math.min(root.maxHeight, root.ui ? root.ui.cfgSafe.windowHeight : 640) + root.padTop + root.padBottom
 
-        anchor.item: root.useRect ? null : root.anchorItem
-        anchor.window: root.useRect ? root.anchorWin : null
         anchor.rect.x: root.rectX
         anchor.rect.y: root.rectY
         anchor.rect.width: root.rectW
