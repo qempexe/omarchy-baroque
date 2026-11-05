@@ -4,6 +4,14 @@ All notable changes to Baroque. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.4] - 2026-11-05
+
+### Fixed
+
+- On Omarchy 4.5, where the bar's window spans the screen, the panel didn't open, or
+  opened over the bar. It now opens off the bar's outer edge, on any edge and with any
+  bar size.
+
 ## [1.1.3] - 2026-11-04
 
 ### Changed
@@ -80,6 +88,9 @@ All notable changes to Baroque. The format follows
   the button's clicks do.
 - ipc for looks, shapes, places, corners, the frame and status.
 
+[1.1.4]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.3...v1.1.4
+[1.1.3]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.2...v1.1.3
+[1.1.2]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/qempexe/omarchy-baroque/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/qempexe/omarchy-baroque/compare/v1.0.0...v1.0.1
