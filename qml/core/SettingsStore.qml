@@ -120,7 +120,7 @@ Item {
 
     Process {
         id: mkdir
-        command: ["sh", "-c", 'umask 077; mkdir -p "$1" && chmod 700 "$1"', "sh", root.stateDir]
+        command: ["setsid", "sh", "-c", 'trap \'trap "" TERM; kill -TERM -- -$$; sleep 1; kill -KILL -- -$$\' TERM; umask 077; mkdir -p "$1" & wait $!; result=$?; if [ "$result" -eq 0 ]; then chmod 700 "$1" & wait $!; result=$?; fi; exit "$result"', "sh", root.stateDir]
         onExited: function(exitCode, exitStatus) {
             dirTimer.stop()
             root.dirReady = exitCode === 0 && exitStatus === 0
@@ -137,7 +137,7 @@ Item {
     Timer {
         id: dirTimer
         interval: 5000
-        onTriggered: if (mkdir.running) mkdir.kill()
+        onTriggered: if (mkdir.running) mkdir.signal(15)
     }
 
     onDirReadyChanged: if (dirReady) dirTimer.stop()

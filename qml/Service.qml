@@ -342,13 +342,13 @@ Item {
     }
     Process {
         id: opaqueProc
-        command: ["omarchy-shell", "shell", "toggleBarTransparency"]
+        command: ["setsid", "sh", "-c", 'trap \'trap "" TERM; kill -TERM -- -$$; sleep 1; kill -KILL -- -$$\' TERM; "$@" & wait $!', "sh", "omarchy-shell", "shell", "toggleBarTransparency"]
         onExited: opaqueTimer.stop()
     }
     Timer {
         id: opaqueTimer
         interval: 5000
-        onTriggered: if (opaqueProc.running) opaqueProc.kill()
+        onTriggered: if (opaqueProc.running) opaqueProc.signal(15)
     }
 
     // a shape by name, or the next one
