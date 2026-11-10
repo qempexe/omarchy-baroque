@@ -4,6 +4,14 @@ All notable changes to Baroque. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.5] - 2026-11-10
+
+### Fixed
+
+- Directory setup and the stock bar transparency helper now have deadlines. Settings
+  only treat the state folder as ready after successful setup, and a stuck transparency
+  request no longer blocks later requests.
+
 ## [1.1.4] - 2026-11-05
 
 ### Fixed
@@ -89,6 +97,7 @@ All notable changes to Baroque. The format follows
 - ipc for looks, shapes, places, corners, the frame and status.
 
 [1.1.4]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.3...v1.1.4
+[1.1.5]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.4...v1.1.5
 [1.1.3]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/qempexe/omarchy-baroque/compare/v1.1.0...v1.1.1
