@@ -335,11 +335,20 @@ Item {
 
     // the stock bar's own "transparent" switch: turned off through its ipc
     function stockOpaque() {
-        if (root.stockTransparent && !opaqueProc.running) opaqueProc.running = true
+        if (root.stockTransparent && !opaqueProc.running) {
+            opaqueProc.running = true
+            opaqueTimer.start()
+        }
     }
     Process {
         id: opaqueProc
         command: ["omarchy-shell", "shell", "toggleBarTransparency"]
+        onExited: opaqueTimer.stop()
+    }
+    Timer {
+        id: opaqueTimer
+        interval: 5000
+        onTriggered: if (opaqueProc.running) opaqueProc.kill()
     }
 
     // a shape by name, or the next one

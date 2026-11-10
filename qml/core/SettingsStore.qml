@@ -22,6 +22,7 @@ Item {
     property var values: ({})
     property bool loaded: false        // the saved file has been read (or there is none)
     property bool dirReady: false      // the state folder exists, so writes can land
+    property bool dirFailed: false     // directory setup ended without a usable folder
 
     signal changed()
 
@@ -75,7 +76,11 @@ Item {
 
     // never write before we've read the file, or an early edit would wipe it
     function flushWrite() {
-        if (!dirReady || !loaded) { writeTimer.restart(); return }
+        if (!loaded) { writeTimer.restart(); return }
+        if (!dirReady) {
+            if (!dirFailed) writeTimer.restart()
+            return
+        }
         file.setText(JSON.stringify(root.values, null, 2) + "\n")
     }
 
@@ -113,15 +118,32 @@ Item {
         changed()
     }
 
-    Component.onCompleted: mkdir.running = true
-
     Process {
         id: mkdir
         command: ["sh", "-c", 'umask 077; mkdir -p "$1" && chmod 700 "$1"', "sh", root.stateDir]
-        onExited: {
-            root.dirReady = true
-            if (!root.loaded) file.reload()
+        onExited: function(exitCode, exitStatus) {
+            dirTimer.stop()
+            root.dirReady = exitCode === 0 && exitStatus === 0
+            root.dirFailed = !root.dirReady
+            if (root.dirReady) {
+                if (!root.loaded) file.reload()
+            } else if (!root.loaded) {
+                root.loaded = true
+                root.changed()
+            }
         }
+    }
+
+    Timer {
+        id: dirTimer
+        interval: 5000
+        onTriggered: if (mkdir.running) mkdir.kill()
+    }
+
+    onDirReadyChanged: if (dirReady) dirTimer.stop()
+    Component.onCompleted: {
+        mkdir.running = true
+        dirTimer.start()
     }
 
     FileView {
